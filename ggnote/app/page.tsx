@@ -3,10 +3,12 @@
 import { useState, useCallback } from "react";
 import NoteEditor from "@/components/NoteEditor";
 import NoteContent from "@/components/NoteContent";
+import FolderList from "@/components/FolderList";
 
 export default function Home() {
   const [leftWidth, setLeftWidth] = useState<number>(33); // Width of left section in %
   const [rightWidth, setRightWidth] = useState<number>(33); // Width of right section in %
+  const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
 
   // Handle mouse move for resizing left section
   const handleLeftResize = useCallback((event: MouseEvent) => {
@@ -30,8 +32,7 @@ export default function Home() {
     <div className="flex h-screen">
       {/* Left Section */}
       <div style={{ width: `${leftWidth}%` }} className="p-4 bg-gray-100">
-        <h2>Section 1</h2>
-        <p>Content for the first section.</p>
+        <FolderList onSelectFolder={setSelectedFolder} />
       </div>
 
       {/* Resizable Divider (Left) */}
