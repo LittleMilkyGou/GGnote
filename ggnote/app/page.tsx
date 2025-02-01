@@ -6,18 +6,19 @@ import NoteContent from "@/components/NoteContent";
 import FolderList from "@/components/FolderList";
 
 export default function Home() {
-  const [leftWidth, setLeftWidth] = useState<number>(33); // Width of left section in %
-  const [rightWidth, setRightWidth] = useState<number>(33); // Width of right section in %
+  const [leftWidth, setLeftWidth] = useState<number>(250); // Sidebar width in px
+  const [middleWidth, setMiddleWidth] = useState<number>(33); // Middle section width in %
+  const [rightWidth, setRightWidth] = useState<number>(33); // Right section width in %
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
 
-  // Handle mouse move for resizing left section
-  const handleLeftResize = useCallback((event: MouseEvent) => {
-    setLeftWidth((prev) => Math.max(10, Math.min(50, prev + event.movementX * 0.1)));
+  // Handle resizing middle section
+  const handleMiddleResize = useCallback((event: MouseEvent) => {
+    setMiddleWidth((prev) => Math.max(20, Math.min(50, prev + event.movementX * 0.1)));
   }, []);
 
-  // Handle mouse move for resizing right section
+  // Handle resizing right section
   const handleRightResize = useCallback((event: MouseEvent) => {
-    setRightWidth((prev) => Math.max(10, Math.min(50, prev - event.movementX * 0.1)));
+    setRightWidth((prev) => Math.max(20, Math.min(50, prev - event.movementX * 0.1)));
   }, []);
 
   // Start dragging the resizer
@@ -30,21 +31,17 @@ export default function Home() {
 
   return (
     <div className="flex h-screen">
+      {/* Folder Sidebar (Resizable) */}
+      <FolderList onSelectFolder={setSelectedFolder} width={leftWidth} setWidth={setLeftWidth} />
 
-
-      {/* Left Section */}
-      <div style={{ width: `${leftWidth}%` }} className="p-4 bg-gray-100">
-        <FolderList onSelectFolder={setSelectedFolder} />
-      </div>
-
-      {/* Resizable Divider (Left) */}
+      {/* Resizable Divider (Middle) */}
       <div
         className="w-2 bg-gray-400 cursor-ew-resize"
-        onMouseDown={() => handleMouseDown(handleLeftResize)}
+        onMouseDown={() => handleMouseDown(handleMiddleResize)}
       ></div>
 
       {/* Middle Section */}
-      <div className="flex-1 p-4">
+      <div style={{ width: `${middleWidth}%` }} className="p-4">
         <NoteEditor />
       </div>
 

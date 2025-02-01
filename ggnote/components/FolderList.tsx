@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import FolderIcon from '@mui/icons-material/Folder';
 
 interface Folder {
   id: number;
@@ -9,14 +10,15 @@ interface Folder {
 
 interface FolderListProps {
   onSelectFolder: (folderId: number | null) => void;
+  width: number; // Width of the sidebar
+  setWidth: (width: number) => void; // Function to update width
 }
 
-export default function FolderList({ onSelectFolder }: FolderListProps) {
+export default function FolderList({ onSelectFolder, width, setWidth }: FolderListProps) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
 
-  // Fetch folders on component mount
   useEffect(() => {
     fetchFolders();
   }, []);
@@ -31,7 +33,6 @@ export default function FolderList({ onSelectFolder }: FolderListProps) {
     }
   };
 
-  // Create a new folder
   const createFolder = async () => {
     if (!newFolderName.trim()) return;
 
@@ -44,14 +45,13 @@ export default function FolderList({ onSelectFolder }: FolderListProps) {
 
       if (response.ok) {
         setNewFolderName("");
-        fetchFolders(); // Refresh folder list
+        fetchFolders();
       }
     } catch (error) {
       console.error("Failed to create folder", error);
     }
   };
 
-  // Delete a folder
   const deleteFolder = async (id: number) => {
     if (!confirm("Are you sure you want to delete this folder?")) return;
 
@@ -74,61 +74,84 @@ export default function FolderList({ onSelectFolder }: FolderListProps) {
     }
   };
 
-  return (
-    <div className="w-64 bg-gray-100 p-4 h-screen overflow-y-auto">
-      <h2 className="text-lg font-semibold mb-4">Folders</h2>
+  // Handle resizable sidebar
+  const handleResize = useCallback((event: MouseEvent) => {
+    setWidth((prev) => Math.max(150, Math.min(400, prev + event.movementX)));
+  }, [setWidth]);
 
-      {/* New Folder Input */}
-      <div className="flex mb-4">
+  const handleMouseDown = () => {
+    document.addEventListener("mousemove", handleResize);
+    document.addEventListener("mouseup", () => {
+      document.removeEventListener("mousemove", handleResize);
+    }, { once: true });
+  };
+
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <div style={{ width: `${width}px` }} className="bg-gray-100 p-4 h-screen overflow-y-auto">
+        <h2 className="text-lg font-semibold mb-4">Folders</h2>
+
+        {/* New Folder Input */}
+        <div className="flex mb-4">
+          <button
+            type="button"
+            className="ml-2 bg-blue-500 text-white px-3 py-2 rounded"
+            onClick={createFolder}
+          >
+            +
+          </button>
+        </div>
+
+        {/* Folder List */}
+        <ul className="space-y-2">
+          <li
+            className={`cursor-pointer p-2 rounded ${selectedFolder === null ? "bg-blue-200" : "hover:bg-gray-200"}`}
+            onClick={() => {
+              setSelectedFolder(null);
+              onSelectFolder(null);
+            }}
+          >
+            📄 All Notes
+          </li>
+          {folders.map((folder) => (
+            <li
+              key={folder.id}
+              className={`flex justify-between items-center cursor-pointer p-2 rounded ${selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"}`}
+              onClick={() => {
+                setSelectedFolder(folder.id);
+                onSelectFolder(folder.id);
+              }}
+            >
+              <span><FolderIcon /> {folder.name}</span>
+              <button
+                className="text-red-500 hover:text-red-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteFolder(folder.id);
+                }}
+              >
+                ✖
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {/* Folder Name Input */}
         <input
           type="text"
-          className="border p-2 flex-1 rounded"
+          className="border p-2 flex-1 rounded mt-4 w-full"
           placeholder="New Folder"
           value={newFolderName}
           onChange={(e) => setNewFolderName(e.target.value)}
         />
-        <button
-          type="button"
-          className="ml-2 bg-blue-500 text-white px-3 py-2 rounded"
-          onClick={createFolder}
-        >
-          +
-        </button>
       </div>
 
-      {/* Folder List */}
-      <ul className="space-y-2">
-        <li
-          className={`cursor-pointer p-2 rounded ${selectedFolder === null ? "bg-blue-200" : "hover:bg-gray-200"}`}
-          onClick={() => {
-            setSelectedFolder(null);
-            onSelectFolder(null);
-          }}
-        >
-          📄 All Notes
-        </li>
-        {folders.map((folder) => (
-          <li
-            key={folder.id}
-            className={`flex justify-between items-center cursor-pointer p-2 rounded ${selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"}`}
-            onClick={() => {
-              setSelectedFolder(folder.id);
-              onSelectFolder(folder.id);
-            }}
-          >
-            <span>📁 {folder.name}</span>
-            <button
-              className="text-red-500 hover:text-red-700"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteFolder(folder.id);
-              }}
-            >
-              ✖
-            </button>
-          </li>
-        ))}
-      </ul>
+      {/* Resizable Divider */}
+      <div
+        className="w-2 bg-gray-400 cursor-ew-resize"
+        onMouseDown={handleMouseDown}
+      ></div>
     </div>
   );
 }
