@@ -5,6 +5,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Define font variables */
+  --font-primary: var(--font-source-code); /* Source Code Pro as primary font */
+  --font-fallback: var(--font-source-serif); /* Source Serif 4 as fallback font */
+  --font-chinese: var(--font-lxgw-wenkai);
 }
 
 @media (prefers-color-scheme: light) {
@@ -14,8 +19,22 @@
   }
 }
 
+/* Apply fonts globally */
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary), var(--font-fallback), sans-serif;
+}
+
+/* Apply LXGW WenKai for Chinese text */
+body :lang(zh), 
+body *:lang(zh), 
+body [lang|="zh"], 
+body [lang^="zh-"] {
+  font-family: var(--font-chinese) !important;
+}
+
+/* Ensure Source Code Pro is used for monospaced content */
+code, pre {
+  font-family: var(--font-primary) !important;
 }

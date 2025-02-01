@@ -20,6 +20,7 @@ db.exec(`
     content TEXT NOT NULL,
     folder_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL
   )
 `);
