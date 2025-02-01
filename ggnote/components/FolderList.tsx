@@ -27,14 +27,7 @@ export default function FolderList({ onSelectFolder, width, setWidth }: FolderLi
     const data = await fetchFolders();
     setFolders(data);
 
-    // Auto-select the first folder if available
-    if (data.length > 0) {
-      setSelectedFolder(data[0].id);
-      onSelectFolder(data[0].id);
-    } else {
-      setSelectedFolder(null);
-      onSelectFolder(null);
-    }
+    
   };
 
   const handleCreateFolder = async () => {

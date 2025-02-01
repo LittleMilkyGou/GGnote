@@ -19,7 +19,7 @@ export default function NoteContent({ selectedFolder }: NoteContentProps) {
   useEffect(() => {
     fetchNotes();
   }, [selectedFolder]);
-
+  
   // Fetch notes based on the selected folder
   const fetchNotes = async () => {
     try {

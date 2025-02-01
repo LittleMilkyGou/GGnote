@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 
-// Save a new note with optional folder_id
+// Create a new note with title
 export async function POST(req: NextRequest) {
   try {
-    const { content, folder_id } = await req.json();
+    const { title, content, folder_id } = await req.json();
 
-    if (!content || typeof content !== "string") {
-      return NextResponse.json({ error: "Invalid content" }, { status: 400 });
+    if (!title || typeof title !== "string" || title.trim() === "") {
+      return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
     const statement = db.prepare(`
-      INSERT INTO notes (content, folder_id) VALUES (?, ?)
+      INSERT INTO notes (title, content, folder_id) VALUES (?, ?, ?)
     `);
-    const result = statement.run(content, folder_id || null);
+    const result = statement.run(title, content, folder_id || null);
 
     return NextResponse.json({ message: "Note saved", noteId: result.lastInsertRowid });
   } catch (error) {
@@ -22,20 +22,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Get all notes, optionally filtered by folder
-export async function GET(req: NextRequest) {
+// Get all notes with titles
+export async function GET() {
   try {
-    const url = new URL(req.url);
-    const folderId = url.searchParams.get("folder_id");
-
-    let notes;
-    if (folderId) {
-      const statement = db.prepare("SELECT * FROM notes WHERE folder_id = ? ORDER BY id DESC");
-      notes = statement.all(folderId);
-    } else {
-      const statement = db.prepare("SELECT * FROM notes ORDER BY id DESC");
-      notes = statement.all();
-    }
+    const statement = db.prepare("SELECT id, title, content, folder_id FROM notes ORDER BY id DESC");
+    const notes = statement.all();
 
     return NextResponse.json(notes);
   } catch (error) {

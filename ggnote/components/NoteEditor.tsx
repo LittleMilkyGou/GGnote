@@ -2,8 +2,13 @@
 
 import { useRef, useState } from "react";
 
-export default function NoteEditor() {
+interface NoteContentProps {
+  selectedFolder: number | null;
+}
+
+export default function NoteEditor({ selectedFolder }: NoteContentProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
 
   // Handle pasted images
@@ -57,39 +62,55 @@ export default function NoteEditor() {
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!content.trim()) {
-      alert("Content cannot be empty");
-      return;
+  if (!title.trim()) {
+    alert("Title cannot be empty");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        title, 
+        content, 
+        folder_id: selectedFolder // Pass selectedFolder
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save note");
     }
 
-    try {
-      const response = await fetch("/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      });
+    const data = await response.json();
+    console.log("Note saved with ID:", data.noteId);
 
-      if (!response.ok) {
-        throw new Error("Failed to save note");
-      }
-
-      const data = await response.json();
-      console.log("Note saved with ID:", data.noteId);
-
-      setContent("");
-      if (editorRef.current) {
-        editorRef.current.innerHTML = "";
-      }
-    } catch (error) {
-      console.error("Error saving note:", error);
-      alert("Failed to save note");
+    setTitle("");
+    setContent("");
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
     }
-  };
+  } catch (error) {
+    console.error("Error saving note:", error);
+    alert("Failed to save note");
+  }
+};
+
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      {/* Title Input */}
+      <input
+        type="text"
+        placeholder="Enter note title..."
+        className="w-full border rounded p-2 text-lg font-semibold"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+
+      {/* Content Editor */}
       <div
         ref={editorRef}
         contentEditable
@@ -98,6 +119,8 @@ export default function NoteEditor() {
         className="w-full border rounded p-2 min-h-[200px] outline-none"
         style={{ whiteSpace: "pre-wrap" }}
       />
+
+      {/* Submit Button */}
       <button type="submit" className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
         Save Note
       </button>
