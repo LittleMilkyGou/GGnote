@@ -8,5 +8,7 @@
 - [ ] Storage path setting
 - [ ] Dark mode
 - [ ] Global searching
+- [ ] Drag to Reorder & Set Top Button
+- [ ] Diary Section (Different UI)
 - [ ] Tauri integration for installation of app (Final stage)
 - [ ] Background Images setting (Not important)
