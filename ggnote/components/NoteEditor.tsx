@@ -1,106 +1,73 @@
-'use client'
+'use client';
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
-interface NoteContentProps {
+interface NoteEditorProps {
   selectedFolder: number | null;
+  onCloseEditor: () => void; // Function to close the editor after saving
 }
 
-export default function NoteEditor({ selectedFolder }: NoteContentProps) {
+export default function NoteEditor({ selectedFolder, onCloseEditor }: NoteEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // Handle pasted images
-  const handlePaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
-    const clipboardItems = e.clipboardData.items;
-
-    for (let i = 0; i < clipboardItems.length; i++) {
-      const item = clipboardItems[i];
-
-      if (item.type.startsWith("image/")) {
-        e.preventDefault();
-
-        const file = item.getAsFile();
-        if (file) {
-          const formData = new FormData();
-          formData.append("image", file);
-
-          try {
-            const response = await fetch("/api/upload", {
-              method: "POST",
-              body: formData,
-            });
-
-            if (!response.ok) {
-              throw new Error("Failed to upload image");
-            }
-
-            const data = await response.json();
-            const imageUrl = data.filePath;
-
-            // Insert the image at the cursor position
-            const img = document.createElement("img");
-            img.src = imageUrl;
-            img.style.maxWidth = "100%";
-
-            const selection = window.getSelection();
-            if (selection && selection.rangeCount > 0) {
-              const range = selection.getRangeAt(0);
-              range.deleteContents();
-              range.insertNode(img);
-            }
-
-            setContent(editorRef.current?.innerHTML || "");
-          } catch (error) {
-            console.error("Image upload error:", error);
-          }
-        }
+  // Handle saving when clicking outside the input fields
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        editorRef.current &&
+        !editorRef.current.contains(event.target as Node)
+      ) {
+        handleSave();
       }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [title, content]); // Runs when title or content changes
+
+  // Auto-save function
+  const handleSave = async () => {
+    if (isSaving) return; // Prevent multiple saves
+    if (!title.trim() && !content.trim()) {
+      onCloseEditor(); // Close editor if both fields are empty
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          content: content.trim(),
+          folder_id: selectedFolder,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save note");
+      }
+
+      console.log("Note saved successfully");
+
+      onCloseEditor(); // Close editor after successful save
+    } catch (error) {
+      console.error("Error saving note:", error);
+      alert("Failed to save note");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  if (!title.trim()) {
-    alert("Title cannot be empty");
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/notes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        title, 
-        content, 
-        folder_id: selectedFolder // Pass selectedFolder
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to save note");
-    }
-
-    const data = await response.json();
-    console.log("Note saved with ID:", data.noteId);
-
-    setTitle("");
-    setContent("");
-    if (editorRef.current) {
-      editorRef.current.innerHTML = "";
-    }
-  } catch (error) {
-    console.error("Error saving note:", error);
-    alert("Failed to save note");
-  }
-};
-
-
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+    <div ref={editorRef} className="flex flex-col gap-2">
       {/* Title Input */}
       <input
         type="text"
@@ -112,18 +79,12 @@ export default function NoteEditor({ selectedFolder }: NoteContentProps) {
 
       {/* Content Editor */}
       <div
-        ref={editorRef}
         contentEditable
+        ref={editorRef}
         onInput={(e) => setContent(e.currentTarget.innerHTML)}
-        onPaste={handlePaste}
         className="w-full border rounded p-2 min-h-[200px] outline-none"
         style={{ whiteSpace: "pre-wrap" }}
       />
-
-      {/* Submit Button */}
-      <button type="submit" className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
-        Save Note
-      </button>
-    </form>
+    </div>
   );
 }

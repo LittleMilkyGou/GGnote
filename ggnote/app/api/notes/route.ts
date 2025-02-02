@@ -6,14 +6,15 @@ export async function POST(req: NextRequest) {
   try {
     const { title, content, folder_id } = await req.json();
 
-    if (!title || typeof title !== "string" || title.trim() === "") {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    // Ensure at least title or content is not empty
+    if ((!title || title.trim() === "") && (!content || content.trim() === "")) {
+      return NextResponse.json({ error: "Title or content must not be empty" }, { status: 400 });
     }
 
     const statement = db.prepare(`
       INSERT INTO notes (title, content, folder_id) VALUES (?, ?, ?)
     `);
-    const result = statement.run(title, content, folder_id || null);
+    const result = statement.run(title || "Untitled Note", content || "", folder_id || null);
 
     return NextResponse.json({ message: "Note saved", noteId: result.lastInsertRowid });
   } catch (error) {
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save note" }, { status: 500 });
   }
 }
+
 
 // Get all notes with titles and updateTime
 export async function GET(req: NextRequest) {

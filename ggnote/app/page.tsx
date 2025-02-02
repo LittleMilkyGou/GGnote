@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import NoteEditor from "@/components/NoteEditor";
-import NoteContent from "@/components/NoteContent";
+import NoteList from "@/components/NoteList";
 import NoteViewer from "@/components/NoteViewer";
 import FolderList from "@/components/FolderList";
 
@@ -14,10 +14,12 @@ export default function Home() {
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
 
+  // Handle resizing middle section
   const handleMiddleResize = useCallback((event: MouseEvent) => {
     setMiddleWidth((prev) => Math.max(20, Math.min(50, prev + event.movementX * 0.1)));
   }, []);
 
+  // Handle resizing right section
   const handleRightResize = useCallback((event: MouseEvent) => {
     setRightWidth((prev) => Math.max(20, Math.min(50, prev - event.movementX * 0.1)));
   }, []);
@@ -33,8 +35,25 @@ export default function Home() {
     );
   };
 
+  const handleOpenEditor = () => {
+    setIsEditorOpen(true);
+    setSelectedNoteId(null); // Deselect any open note
+  };
+  
+  const handleCloseEditor = () => {
+    setIsEditorOpen(false);
+  };
+  
+
+  // Open NoteViewer (Triggered by Clicking a Note)
+  const handleSelectNote = (noteId: number) => {
+    setSelectedNoteId(noteId);
+    setIsEditorOpen(false); // Close editor
+  };
+
   return (
     <div className="flex h-screen">
+      {/* Folder Sidebar */}
       <FolderList onSelectFolder={setSelectedFolder} width={leftWidth} setWidth={setLeftWidth} />
 
       {selectedFolder === null ? (
@@ -44,16 +63,29 @@ export default function Home() {
         </div>
       ) : (
         <>
+          {/* Resizable Divider (Middle) */}
           <div className="w-2 bg-gray-400 cursor-ew-resize" onMouseDown={() => handleMouseDown(handleMiddleResize)}></div>
 
+          {/* Middle Section - Note List */}
           <div style={{ width: `${middleWidth}%` }} className="p-4">
-            <NoteContent selectedFolder={selectedFolder} onAddNote={() => setIsEditorOpen(true)} onSelectNote={setSelectedNoteId} />
+            <NoteList 
+              selectedFolder={selectedFolder} 
+              onAddNote={handleOpenEditor} 
+              onSelectNote={handleSelectNote} 
+            />
           </div>
 
+          {/* Resizable Divider (Right) */}
           <div className="w-2 bg-gray-400 cursor-ew-resize" onMouseDown={() => handleMouseDown(handleRightResize)}></div>
 
+          {/* Right Section - Display Editor or Viewer */}
           <div style={{ width: `${rightWidth}%` }} className="p-4">
-            {isEditorOpen ? <NoteEditor selectedFolder={selectedFolder} /> : <NoteViewer selectedNoteId={selectedNoteId} />}
+            {isEditorOpen ? (
+              <NoteEditor selectedFolder={selectedFolder} onCloseEditor={handleCloseEditor} />
+            ) : (
+              <NoteViewer selectedNoteId={selectedNoteId} />
+            )}
+
           </div>
         </>
       )}

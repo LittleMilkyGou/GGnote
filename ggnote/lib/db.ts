@@ -3,7 +3,6 @@ import path from "path";
 
 const dbPath = path.join(process.cwd(), "ggnote.db");
 const db = new Database(dbPath);
-
 // Create folders table
 db.exec(`
   CREATE TABLE IF NOT EXISTS folders (
@@ -17,7 +16,7 @@ db.exec(`
 db.exec(`
   CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
+    title TEXT,
     content TEXT,
     folder_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

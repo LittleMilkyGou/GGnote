@@ -9,15 +9,16 @@ interface Note {
   updated_at: string;
 }
 
-interface NoteContentProps {
+interface NoteListProps {
   selectedFolder: number | null;
   onAddNote: () => void;
   onSelectNote: (noteId: number) => void;
 }
 
-export default function NoteContent({ selectedFolder, onAddNote, onSelectNote }: NoteContentProps) {
+export default function NoteList({ selectedFolder, onAddNote, onSelectNote }: NoteListProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null); // Track selected note
 
   useEffect(() => {
     fetchNotes();
@@ -42,6 +43,12 @@ export default function NoteContent({ selectedFolder, onAddNote, onSelectNote }:
   const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Handle note selection and update state
+  const handleNoteClick = (noteId: number) => {
+    setSelectedNoteId(noteId);
+    onSelectNote(noteId);
+  };
 
   return (
     <div className="mt-4">
@@ -69,8 +76,10 @@ export default function NoteContent({ selectedFolder, onAddNote, onSelectNote }:
           {filteredNotes.map((note) => (
             <li 
               key={note.id} 
-              className="p-3 border rounded flex flex-col justify-center cursor-pointer hover:bg-gray-100"
-              onClick={() => onSelectNote(note.id)} // Select note on click
+              className={`p-3 border rounded flex flex-col justify-center cursor-pointer ${
+                selectedNoteId === note.id ? "bg-blue-200 border-blue-500" : "hover:bg-gray-100"
+              }`}
+              onClick={() => handleNoteClick(note.id)} // Select note on click
             >
               <span className="font-semibold text-xl">{note.title}</span>
               <span className="text-gray-500 text-sm">{new Date(note.updated_at).toLocaleString()}</span>
