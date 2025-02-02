@@ -9,6 +9,7 @@
 - [ ] Dark mode
 - [ ] Global searching
 - [ ] Drag to Reorder & Set Top Button
+- [ ] Deleted notes into trash bin (DB Backup)
 - [ ] Diary Section (Different UI)
 - [ ] Tauri integration for installation of app (Final stage)
 - [ ] Background Images setting (Not important)
