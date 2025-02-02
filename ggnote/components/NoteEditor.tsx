@@ -3,87 +3,102 @@
 import { useRef, useState, useEffect } from "react";
 
 interface NoteEditorProps {
-  selectedFolder: number | null;
-  onCloseEditor: () => void; // Function to close the editor after saving
+  selectedNote: { id: number; title: string; content: string };
+  onCloseEditor: () => void;
 }
 
-export default function NoteEditor({ selectedFolder, onCloseEditor }: NoteEditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
+export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorProps) {
+  // Use one ref for the container (for click outside detection)
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Use another ref for the contentEditable element
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const [title, setTitle] = useState<string>(selectedNote.title);
+  // We'll keep local state for content so we can save it,
+  // but we won't force re-render the contentEditable's inner HTML on every change.
+  const [content, setContent] = useState<string>(selectedNote.content);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // Handle saving when clicking outside the input fields
+  // Update state when a new note is selected.
+  useEffect(() => {
+    setTitle(selectedNote.title);
+    setContent(selectedNote.content);
+    // Also update the contentEditable's inner HTML directly.
+    if (contentRef.current) {
+      contentRef.current.innerHTML = selectedNote.content;
+    }
+  }, [selectedNote]);
+
+  // Click outside detection using the container ref.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        editorRef.current &&
-        !editorRef.current.contains(event.target as Node)
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
       ) {
         handleSave();
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [title, content]); // Runs when title or content changes
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [title, content]);
 
-  // Auto-save function
+  // Save function.
   const handleSave = async () => {
-    if (isSaving) return; // Prevent multiple saves
+    if (isSaving) return;
+
+    // If both fields are empty, simply close the editor.
     if (!title.trim() && !content.trim()) {
-      onCloseEditor(); // Close editor if both fields are empty
+      onCloseEditor();
       return;
     }
 
     setIsSaving(true);
 
     try {
-      const response = await fetch("/api/notes", {
-        method: "POST",
+      const response = await fetch(`/api/notes/${selectedNote.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim(),
           content: content.trim(),
-          folder_id: selectedFolder,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to save note");
-      }
+      if (!response.ok) throw new Error("Failed to update note");
 
-      console.log("Note saved successfully");
-
-      onCloseEditor(); // Close editor after successful save
+      console.log("Note updated successfully");
+      onCloseEditor();
     } catch (error) {
-      console.error("Error saving note:", error);
-      alert("Failed to save note");
+      console.error("Error updating note:", error);
+      alert("Failed to update note");
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div ref={editorRef} className="p-4 border rounded h-full bg-white shadow">
+    <div ref={containerRef} className="p-4 border rounded h-full bg-white shadow">
+      <h3 className="text-sm text-gray-500 font-semibold mb-2">Edit Note</h3>
+
       {/* Title Input */}
       <input
         type="text"
-        placeholder="Enter note title..."
         className="w-full border-b p-2 text-2xl font-bold outline-none focus:border-blue-500"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
 
-      {/* Content Editor */}
+      {/* Uncontrolled Content Editable */}
       <div
         contentEditable
-        ref={editorRef}
+        ref={contentRef}
+        // We update our local state on input but we don't re-render the innerHTML.
         onInput={(e) => setContent(e.currentTarget.innerHTML)}
-        className="w-full mt-3 border-t p-2 text-gray-700 min-h-[200px] outline-none focus:border-blue-500"
+        className="w-full mt-3 p-2 text-gray-700 min-h-[200px] outline-none focus:border-blue-500"
         style={{ whiteSpace: "pre-wrap" }}
+        suppressContentEditableWarning
       />
     </div>
   );

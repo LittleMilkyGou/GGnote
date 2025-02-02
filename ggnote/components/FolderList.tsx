@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect,  useRef } from "react";
 import FolderIcon from '@mui/icons-material/Folder';
 import { CreateNewFolderOutlined } from "@mui/icons-material";
 import { fetchFolders, createFolder, deleteFolder } from "@/lib/folderAPI";
@@ -9,10 +9,9 @@ import { Folder } from "@/interface/folderInterface";
 interface FolderListProps {
   onSelectFolder: (folderId: number | null) => void;
   width: number;
-  setWidth: (width: number) => void;
 }
 
-export default function FolderList({ onSelectFolder, width, setWidth }: FolderListProps) {
+export default function FolderList({ onSelectFolder, width }: FolderListProps) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
   const [newFolderName, setNewFolderName] = useState("");

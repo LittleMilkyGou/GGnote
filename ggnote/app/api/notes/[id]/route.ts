@@ -42,17 +42,24 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 }
 
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Extract `id` correctly from params
     const id = parseInt(params.id);
-    const { content } = await req.json();
 
-    if (isNaN(id) || !content || typeof content !== "string") {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    if (isNaN(id)) {
+      return NextResponse.json({ error: "Invalid note ID" }, { status: 400 });
     }
 
-    const statement = db.prepare("UPDATE notes SET content = ? WHERE id = ?");
-    statement.run(content, id);
+    const { title, content } = await req.json();
+
+    if (!title && !content) {
+      return NextResponse.json({ error: "Title or content must be provided" }, { status: 400 });
+    }
+
+    const statement = db.prepare("UPDATE notes SET title = ?, content = ? WHERE id = ?");
+    statement.run(title || "Untitled Note", content || "", id);
 
     return NextResponse.json({ message: "Note updated successfully" });
   } catch (error) {

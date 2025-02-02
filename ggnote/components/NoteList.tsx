@@ -76,8 +76,8 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote }: No
           {filteredNotes.map((note) => (
             <li 
               key={note.id} 
-              className={`p-3 border rounded flex flex-col justify-center cursor-pointer ${
-                selectedNoteId === note.id ? "bg-blue-200 border-blue-500" : "hover:bg-gray-100"
+              className={`p-3 rounded flex flex-col justify-center cursor-pointer ${
+                selectedNoteId === note.id ? "bg-gray-300 " : "hover:bg-gray-200"
               }`}
               onClick={() => handleNoteClick(note.id)} // Select note on click
             >
