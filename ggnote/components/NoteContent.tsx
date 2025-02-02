@@ -1,25 +1,28 @@
-'use client'
+'use client';
 
 import React, { useEffect, useState } from "react";
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 
 interface Note {
   id: number;
-  content: string;
-  folder_id: number | null;
+  title: string;
+  updated_at: string;
 }
 
 interface NoteContentProps {
   selectedFolder: number | null;
+  onAddNote: () => void;
+  onSelectNote: (noteId: number) => void;
 }
 
-export default function NoteContent({ selectedFolder }: NoteContentProps) {
+export default function NoteContent({ selectedFolder, onAddNote, onSelectNote }: NoteContentProps) {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [editingNote, setEditingNote] = useState<{ id: number; content: string } | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     fetchNotes();
   }, [selectedFolder]);
-  
+
   // Fetch notes based on the selected folder
   const fetchNotes = async () => {
     try {
@@ -35,96 +38,45 @@ export default function NoteContent({ selectedFolder }: NoteContentProps) {
     }
   };
 
-  // Handle note deletion
-  const deleteNote = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this note?")) return;
-
-    try {
-      const response = await fetch(`/api/notes/${id}`, { method: "DELETE" });
-
-      if (response.ok) {
-        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
-      }
-    } catch (error) {
-      console.error("Failed to delete note:", error);
-    }
-  };
-
-  // Handle note editing
-  const startEditing = (note: Note) => {
-    setEditingNote({ id: note.id, content: note.content });
-  };
-
-  const saveEdit = async () => {
-    if (!editingNote) return;
-
-    try {
-      const response = await fetch(`/api/notes/${editingNote.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: editingNote.content }),
-      });
-
-      if (response.ok) {
-        setNotes((prevNotes) =>
-          prevNotes.map((note) =>
-            note.id === editingNote.id ? { ...note, content: editingNote.content } : note
-          )
-        );
-        setEditingNote(null);
-      }
-    } catch (error) {
-      console.error("Failed to update note:", error);
-    }
-  };
+  // Filter notes based on search query
+  const filteredNotes = notes.filter(note =>
+    note.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="mt-4">
-      <h2 className="text-xl font-bold mb-2">
-        {selectedFolder ? `Notes in Folder #${selectedFolder}` : "All Notes"}
-      </h2>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="搜索"
+            className="border p-2 rounded"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {/* Add Note Button */}
+          <button onClick={onAddNote} className="text-black p-2 rounded flex items-center">
+            <BorderColorIcon />
+          </button>
+        </div>
+      </div>
 
-      {notes.length === 0 ? (
+      {filteredNotes.length === 0 ? (
         <p className="text-gray-500">No notes available.</p>
       ) : (
-        notes.map((note) => (
-          <div key={note.id} className="p-4 border rounded mb-4 flex flex-col">
-            {editingNote && editingNote.id === note.id ? (
-              <textarea
-                className="border p-2 w-full"
-                value={editingNote.content}
-                onChange={(e) => setEditingNote({ ...editingNote, content: e.target.value })}
-              />
-            ) : (
-              <div dangerouslySetInnerHTML={{ __html: note.content }} />
-            )}
-
-            <div className="flex justify-end space-x-2 mt-2">
-              {editingNote && editingNote.id === note.id ? (
-                <>
-                  <button className="bg-green-500 text-white px-3 py-1 rounded" onClick={saveEdit}>
-                    Save
-                  </button>
-                  <button
-                    className="bg-gray-400 text-white px-3 py-1 rounded"
-                    onClick={() => setEditingNote(null)}
-                  >
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() => startEditing(note)}>
-                    Edit
-                  </button>
-                  <button className="bg-red-500 text-white px-3 py-1 rounded" onClick={() => deleteNote(note.id)}>
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        ))
+        <ul className="space-y-2">
+          {filteredNotes.map((note) => (
+            <li 
+              key={note.id} 
+              className="p-3 border rounded flex flex-col justify-center cursor-pointer hover:bg-gray-100"
+              onClick={() => onSelectNote(note.id)} // Select note on click
+            >
+              <span className="font-semibold text-xl">{note.title}</span>
+              <span className="text-gray-500 text-sm">{new Date(note.updated_at).toLocaleString()}</span>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

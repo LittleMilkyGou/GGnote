@@ -22,11 +22,22 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Get all notes with titles
-export async function GET() {
+// Get all notes with titles and updateTime
+export async function GET(req: NextRequest) {
   try {
-    const statement = db.prepare("SELECT id, title, content, folder_id FROM notes ORDER BY id DESC");
-    const notes = statement.all();
+    const url = new URL(req.url);
+    const folderId = url.searchParams.get("folder_id");
+
+    let statement;
+    let notes;
+
+    if (folderId) {
+      statement = db.prepare("SELECT id, title, updated_at FROM notes WHERE folder_id = ? ORDER BY updated_at DESC");
+      notes = statement.all(folderId);
+    } else {
+      statement = db.prepare("SELECT id, title, updated_at FROM notes ORDER BY updated_at DESC");
+      notes = statement.all();
+    }
 
     return NextResponse.json(notes);
   } catch (error) {
@@ -34,3 +45,4 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch notes" }, { status: 500 });
   }
 }
+

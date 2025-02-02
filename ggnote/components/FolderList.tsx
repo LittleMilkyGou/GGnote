@@ -92,7 +92,7 @@ export default function FolderList({ onSelectFolder, width, setWidth }: FolderLi
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <div style={{ width: `${width}px` }} className="bg-gray-100 p-4 h-screen overflow-y-auto">
+      <div style={{ width: `${width}px` }} className=" p-4 h-screen overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">GG Note</h2>
 
         {/* Create New Folder Button */}
