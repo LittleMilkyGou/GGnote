@@ -67,12 +67,12 @@ export default function NoteEditor({ selectedFolder, onCloseEditor }: NoteEditor
   };
 
   return (
-    <div ref={editorRef} className="flex flex-col gap-2">
+    <div ref={editorRef} className="p-4 border rounded h-full bg-white shadow">
       {/* Title Input */}
       <input
         type="text"
         placeholder="Enter note title..."
-        className="w-full border rounded p-2 text-lg font-semibold"
+        className="w-full border-b p-2 text-2xl font-bold outline-none focus:border-blue-500"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
@@ -82,7 +82,7 @@ export default function NoteEditor({ selectedFolder, onCloseEditor }: NoteEditor
         contentEditable
         ref={editorRef}
         onInput={(e) => setContent(e.currentTarget.innerHTML)}
-        className="w-full border rounded p-2 min-h-[200px] outline-none"
+        className="w-full mt-3 border-t p-2 text-gray-700 min-h-[200px] outline-none focus:border-blue-500"
         style={{ whiteSpace: "pre-wrap" }}
       />
     </div>

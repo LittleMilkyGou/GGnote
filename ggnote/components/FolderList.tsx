@@ -78,16 +78,6 @@ export default function FolderList({ onSelectFolder, width, setWidth }: FolderLi
     }
   };
 
-  const handleResize = useCallback((event: MouseEvent) => {
-    setWidth((prev) => Math.max(150, Math.min(400, prev + event.movementX)));
-  }, [setWidth]);
-
-  const handleMouseDown = () => {
-    document.addEventListener("mousemove", handleResize);
-    document.addEventListener("mouseup", () => {
-      document.removeEventListener("mousemove", handleResize);
-    }, { once: true });
-  };
 
   return (
     <div className="flex h-screen">
@@ -148,8 +138,6 @@ export default function FolderList({ onSelectFolder, width, setWidth }: FolderLi
         )}
       </div>
 
-      {/* Resizable Divider */}
-      <div className="w-2 bg-gray-400 cursor-ew-resize" onMouseDown={handleMouseDown}></div>
     </div>
   );
 }
