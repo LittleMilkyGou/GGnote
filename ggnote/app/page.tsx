@@ -6,11 +6,16 @@ import NoteList from "@/components/NoteList";
 import NoteViewer from "@/components/NoteViewer";
 import FolderList from "@/components/FolderList";
 import NoteCreator from "@/components/NoteCreator";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+ 
 
 export default function Home() {
   const [leftWidth, setLeftWidth] = useState<number>(250);
-  const [middleWidth, setMiddleWidth] = useState<number>(33);
-  const [rightWidth, setRightWidth] = useState<number>(34);
+
 
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
@@ -18,26 +23,7 @@ export default function Home() {
   const [editingNote, setEditingNote] = useState<{ id: number; title: string; content: string } | null>(null);
   const [isCreatorOpen, setIsCreatorOpen] = useState<boolean>(false);
 
-  const handleLeftResize = useCallback((event: MouseEvent) => {
-    setLeftWidth((prevLeft) => {
-      const newLeftWidth = Math.max(150, Math.min(400, prevLeft + event.movementX));
-      return newLeftWidth;
-    });
-  }, []);
 
-  const handleRightResize = useCallback((event: MouseEvent) => {
-    setRightWidth((prevRight) => {
-      const newRightWidth = Math.max(20, Math.min(50, prevRight - event.movementX * 0.1));
-      return newRightWidth;
-    });
-  }, []);
-
-  const handleMouseDown = (resizeFunction: (event: MouseEvent) => void) => {
-    document.addEventListener("mousemove", resizeFunction);
-    document.addEventListener("mouseup", () => {
-      document.removeEventListener("mousemove", resizeFunction);
-    }, { once: true });
-  };
 
   const handleCloseEditor = () => {
     setIsEditorOpen(false);
@@ -80,32 +66,35 @@ export default function Home() {
         </div>
       ) : (
         <>
-          <div className="w-[0.1rem] bg-gray-300 cursor-ew-resize" onMouseDown={() => handleMouseDown(handleLeftResize)}></div>
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel>
+              <div className="p-4">
+                <NoteList
+                  selectedFolder={selectedFolderId}
+                  onAddNote={handleOpenCreator}
+                  onSelectNote={handleSelectNote}
+                />
+              </div>
+            </ResizablePanel>
+            <ResizableHandle />
 
-          <div style={{ width: `${middleWidth}%` }} className="p-4">
-            <NoteList
-              selectedFolder={selectedFolderId}
-              onAddNote={handleOpenCreator}
-              onSelectNote={handleSelectNote}
-            />
-          </div>
+            <ResizablePanel>
 
-          <div className="w-[0.1rem] bg-gray-300 cursor-ew-resize" onMouseDown={() => handleMouseDown(handleRightResize)}></div>
+              <div className="p-8">
+                {isEditorOpen && editingNote ? (
+                  <NoteEditor
+                    selectedNote={editingNote}
+                    onCloseEditor={handleCloseEditor}
+                  />
+                ) : isCreatorOpen ? (
+                  <NoteCreator selectedFolder={selectedFolderId} onCloseCreator={handleCloseCreator}/>
+                ) : (
+                  <NoteViewer selectedNoteId={selectedNoteId} handleEditNote={handleEditNote} />
+                )}
 
-          <div style={{ width: `${rightWidth}%` }} className="p-4">
-            {isEditorOpen && editingNote ? (
-              <NoteEditor
-                selectedNote={editingNote}
-                onCloseEditor={handleCloseEditor}
-              />
-            ) : isCreatorOpen ? (
-              <NoteCreator selectedFolder={selectedFolderId} onCloseCreator={handleCloseCreator}/>
-            ) : (
-              <NoteViewer selectedNoteId={selectedNoteId} handleEditNote={handleEditNote} />
-            )}
-
-          </div>
-
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </>
       )}
     </div>

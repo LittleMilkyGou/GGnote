@@ -52,13 +52,13 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote }: No
 
   return (
     <div className="mt-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className=" flex flex-grow items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
           {/* Search Bar */}
           <input
             type="text"
             placeholder="搜索"
-            className="border p-2 rounded"
+            className="border border-b-2 py-1 px-2 rounded-lg shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

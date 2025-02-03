@@ -41,20 +41,20 @@ export default function NoteViewer({ selectedNoteId, handleEditNote }: NoteViewe
   };
 
   return (
-    <div className="p-4 border rounded h-full bg-white shadow" >
+    <div className="rounded h-full bg-white" >
       {loading ? (
         <p className="text-gray-500">Loading note...</p>
       ) : note ? (
-        <div  className="h-full" onClick={() => handleEditNote(note)}>
+        <div  className="h-full" onDoubleClick={() => handleEditNote(note)}>
           <h3 className="text-sm text-gray-500 mt-2">Last updated: {new Date(note.updated_at).toLocaleString()}</h3>
 
           <h2
-            className="text-2xl font-bold mb-2 cursor-pointer hover:bg-gray-200 p-1 rounded"
+            className="text-2xl font-bold mb-2 cursor-pointer p-1 rounded"
           >
             {note.title}
           </h2>
           <div
-            className="border-t pt-3 text-gray-700 p-1 rounded"
+            className="border-t pt-3 cursor-pointer text-gray-700 p-1 rounded"
           >
             <div dangerouslySetInnerHTML={{ __html: note.content }} />
           </div>

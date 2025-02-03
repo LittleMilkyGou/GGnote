@@ -79,7 +79,7 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
   };
 
   return (
-    <div ref={containerRef} className="p-4 border rounded h-full bg-white shadow">
+    <div ref={containerRef} className="rounded h-full bg-white">
       <h3 className="text-sm text-gray-500 font-semibold mb-2">Edit Note</h3>
 
       {/* Title Input */}

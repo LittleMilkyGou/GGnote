@@ -57,7 +57,7 @@ export default function NoteCreator({ selectedFolder, onCloseCreator }: NoteCrea
   };
 
   return (
-    <div ref={editorRef} className="p-4 border rounded h-full bg-white shadow">
+    <div ref={editorRef} className="rounded h-full bg-white">
       <h3 className="text-lg font-semibold mb-2">New Note</h3>
 
       {/* Title Input */}
@@ -74,7 +74,7 @@ export default function NoteCreator({ selectedFolder, onCloseCreator }: NoteCrea
         contentEditable
         ref={editorRef}
         onInput={(e) => setContent(e.currentTarget.innerHTML)}
-        className="w-full mt-3 p-2 text-gray-700 min-h-[200px] outline-none focus:border-blue-500"
+        className="w-full mt-3 p-2 text-gray-700 outline-none focus:border-blue-500"
         style={{ whiteSpace: "pre-wrap" }}
       />
     </div>
