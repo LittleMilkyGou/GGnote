@@ -1,5 +1,7 @@
 import { Source_Serif_4, Source_Code_Pro, LXGW_WenKai_TC } from "next/font/google";
 import "./globals.css";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
 // Load Source Code Pro as the primary English font
 const sourceCode = Source_Code_Pro({
@@ -29,7 +31,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh" className={`${sourceCode.variable} ${sourceSerif.variable} ${lxgwWenKai.variable}`}>
       <body className="antialiased">
-        {children}
+        <SidebarProvider>
+          <AppSidebar />
+          <main className="flex-1">
+            <SidebarTrigger />
+            {children}
+          </main>
+        </SidebarProvider>
       </body>
     </html>
   );

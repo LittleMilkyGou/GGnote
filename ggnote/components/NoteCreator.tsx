@@ -1,63 +1,71 @@
-'use client';
+import { useEffect, useRef, useState } from "react";
+import { Bold, Italic, Underline } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-import { useState, useRef, useEffect } from "react";
-
-interface NoteCreatorProps {
-  selectedFolder: number | null;
-  onCloseCreator: () => void;
-}
-
-export default function NoteCreator({ selectedFolder, onCloseCreator }: NoteCreatorProps) {
+export default function NoteEditor() {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [activeFormats, setActiveFormats] = useState<string[]>([]);
 
-  // Auto-save when clicking outside
+  // Handle keydown for formatting shortcuts
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (editorRef.current && !editorRef.current.contains(event.target as Node)) {
-        handleSave();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeElement = document.activeElement as HTMLElement;
+      if (!editorRef.current || !activeElement?.isContentEditable) return;
+
+      if (e.ctrlKey || e.metaKey) {
+        let command = "";
+        switch (e.key.toLowerCase()) {
+          case "b":
+            e.preventDefault();
+            command = "bold";
+            break;
+          case "i":
+            e.preventDefault();
+            command = "italic";
+            break;
+          case "u":
+            e.preventDefault();
+            command = "underline";
+            break;
+          default:
+            return;
+        }
+        document.execCommand(command);
+        updateActiveFormats();
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [title, content]);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
-  // Save function
-  const handleSave = async () => {
-    if (isSaving) return;
-    if (!title.trim() && !content.trim()) {
-      onCloseCreator();
-      return;
-    }
+  // Detect active styles
+  const updateActiveFormats = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
 
-    setIsSaving(true);
+    const range = selection.getRangeAt(0);
+    const parentNode = range.commonAncestorContainer.parentElement;
 
-    try {
-      const response = await fetch(`/api/notes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), content: content.trim(), folder_id: selectedFolder }),
-      });
-
-      if (!response.ok) throw new Error("Failed to save note");
-
-      console.log("Note saved successfully");
-      onCloseCreator();
-    } catch (error) {
-      console.error("Error saving note:", error);
-      alert("Failed to save note");
-    } finally {
-      setIsSaving(false);
+    if (parentNode) {
+      const newFormats: string[] = [];
+      if (document.queryCommandState("bold")) newFormats.push("bold");
+      if (document.queryCommandState("italic")) newFormats.push("italic");
+      if (document.queryCommandState("underline")) newFormats.push("underline");
+      setActiveFormats(newFormats);
     }
   };
 
+  // Handle manual button toggles
+  const handleToggle = (format: string) => {
+    document.execCommand(format);
+    updateActiveFormats();
+  };
+
   return (
-    <div ref={editorRef} className="rounded h-full bg-white">
+    <div ref={editorRef} className="rounded h-full bg-white p-4">
       <h3 className="text-lg font-semibold mb-2">New Note</h3>
 
       {/* Title Input */}
@@ -69,11 +77,43 @@ export default function NoteCreator({ selectedFolder, onCloseCreator }: NoteCrea
         onChange={(e) => setTitle(e.target.value)}
       />
 
+      {/* Formatting Toolbar */}
+      <ToggleGroup
+        type="multiple"
+        value={activeFormats}
+        onValueChange={setActiveFormats}
+      >
+        <ToggleGroupItem
+          value="bold"
+          aria-label="Toggle bold"
+          onClick={() => handleToggle("bold")}
+        >
+          <Bold className={`h-4 w-4 ${activeFormats.includes("bold") ? "text-blue-500" : ""}`} />
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="italic"
+          aria-label="Toggle italic"
+          onClick={() => handleToggle("italic")}
+        >
+          <Italic className={`h-4 w-4 ${activeFormats.includes("italic") ? "text-blue-500" : ""}`} />
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="underline"
+          aria-label="Toggle underline"
+          onClick={() => handleToggle("underline")}
+        >
+          <Underline className={`h-4 w-4 ${activeFormats.includes("underline") ? "text-blue-500" : ""}`} />
+        </ToggleGroupItem>
+      </ToggleGroup>
+
       {/* Content Editor */}
       <div
         contentEditable
         ref={editorRef}
-        onInput={(e) => setContent(e.currentTarget.innerHTML)}
+        onInput={(e) => {
+          setContent(e.currentTarget.innerHTML);
+          updateActiveFormats();
+        }}
         className="w-full mt-3 p-2 text-gray-700 outline-none focus:border-blue-500"
         style={{ whiteSpace: "pre-wrap" }}
       />

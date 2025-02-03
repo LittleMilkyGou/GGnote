@@ -57,6 +57,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen">
+      
       <FolderList onSelectFolder={setSelectedFolderId} width={leftWidth} />
 
       {selectedFolderId === null ? (
