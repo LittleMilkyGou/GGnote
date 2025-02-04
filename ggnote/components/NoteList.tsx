@@ -2,6 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import BorderColorIcon from '@mui/icons-material/BorderColor';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
+
 
 interface Note {
   id: number;
@@ -12,10 +19,11 @@ interface Note {
 interface NoteListProps {
   selectedFolder: number | null;
   onAddNote: () => void;
-  onSelectNote: (noteId: number) => void;
+  onSelectNote: (noteId: number | null) => void;
+  onCloseEditor: () => void;
 }
 
-export default function NoteList({ selectedFolder, onAddNote, onSelectNote }: NoteListProps) {
+export default function NoteList({ selectedFolder, onAddNote, onSelectNote,onCloseEditor }: NoteListProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null); // Track selected note
@@ -38,6 +46,22 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote }: No
       console.error("Failed to fetch notes:", error);
     }
   };
+
+  const deleteNote = async (id:number) => {
+    if (!confirm("Are you sure you want to delete this note?")) return;
+
+    try{
+      const response = await fetch(`/api/notes/${id}`,{method:"DELETE"});
+
+      if(response.ok){
+        setNotes((prevNotes) => prevNotes.filter(note => note.id != id));
+        onCloseEditor();
+        onSelectNote(null);
+      }
+    } catch (error){
+      console.error("Failed to delete note:", error);
+    }
+  }
 
   // Filter notes based on search query
   const filteredNotes = notes.filter(note =>
@@ -74,16 +98,29 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote }: No
       ) : (
         <ul className="space-y-2">
           {filteredNotes.map((note) => (
-            <li 
-              key={note.id} 
-              className={`p-3 rounded flex flex-col justify-center cursor-pointer ${
-                selectedNoteId === note.id ? "bg-gray-300 " : "hover:bg-gray-200"
-              }`}
-              onClick={() => handleNoteClick(note.id)} // Select note on click
-            >
-              <span className="font-semibold text-xl">{note.title}</span>
-              <span className="text-gray-500 text-sm">{new Date(note.updated_at).toLocaleString()}</span>
-            </li>
+            <div key={note.id} >
+              <ContextMenu>
+                <ContextMenuTrigger>
+                <li 
+                  
+                  className={`p-3 rounded flex flex-col justify-center cursor-pointer ${
+                    selectedNoteId === note.id ? "bg-gray-300 " : "hover:bg-gray-200"
+                  }`}
+                  onClick={() => handleNoteClick(note.id)} // Select note on click
+                >
+                  <span className="font-semibold text-xl">{note.title}</span>
+                  <span className="text-gray-500 text-sm">{new Date(note.updated_at).toLocaleString()}</span>
+                </li>
+
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuItem onClick={()=>deleteNote(note.id)}>Delete</ContextMenuItem>
+                  {/* <ContextMenuItem>Billing</ContextMenuItem>
+                  <ContextMenuItem>Team</ContextMenuItem>
+                  <ContextMenuItem>Subscription</ContextMenuItem>     */}
+                </ContextMenuContent>
+              </ContextMenu>
+            </div>
           ))}
         </ul>
       )}

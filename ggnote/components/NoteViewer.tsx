@@ -21,6 +21,8 @@ export default function NoteViewer({ selectedNoteId, handleEditNote }: NoteViewe
   useEffect(() => {
     if (selectedNoteId) {
       fetchNoteDetails(selectedNoteId);
+    }else {
+      setNote(null); 
     }
   }, [selectedNoteId]);
 

@@ -28,6 +28,8 @@ export default function Home() {
   const handleCloseEditor = () => {
     setIsEditorOpen(false);
     setEditingNote(null);
+    setSelectedNoteId(null);
+    setIsCreatorOpen(false);
   };
 
   const handleOpenCreator = () => {
@@ -44,7 +46,7 @@ export default function Home() {
     setSelectedNoteId(null);
   };
 
-  const handleSelectNote = (noteId: number) => {
+  const handleSelectNote = (noteId: number | null) => {
     setSelectedNoteId(noteId);
     setIsEditorOpen(false);
   };
@@ -74,6 +76,7 @@ export default function Home() {
                   selectedFolder={selectedFolderId}
                   onAddNote={handleOpenCreator}
                   onSelectNote={handleSelectNote}
+                  onCloseEditor={handleCloseEditor}
                 />
               </div>
             </ResizablePanel>
