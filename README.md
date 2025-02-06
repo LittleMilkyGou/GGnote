@@ -13,3 +13,6 @@
 - [ ] Diary Section (Different UI)
 - [ ] Tauri integration for installation of app (Final stage)
 - [ ] Background Images setting (Not important)
+
+## ⭐ Demo ⭐
+![App Demo](ggnote/public/image.png)
