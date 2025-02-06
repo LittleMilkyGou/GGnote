@@ -4,20 +4,18 @@ import { useState, useCallback } from "react";
 import NoteEditor from "@/components/NoteEditor";
 import NoteList from "@/components/NoteList";
 import NoteViewer from "@/components/NoteViewer";
-import FolderList from "@/components/FolderList";
 import NoteCreator from "@/components/NoteCreator";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import { useFolder } from "@/context/FolderContext";
  
 
 export default function Home() {
-  const [leftWidth, setLeftWidth] = useState<number>(250);
 
-
-  const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
+  const {selectedFolderId} = useFolder();
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [editingNote, setEditingNote] = useState<{ id: number; title: string; content: string } | null>(null);
@@ -60,7 +58,7 @@ export default function Home() {
   return (
     <div className="flex h-screen">
       
-      <FolderList onSelectFolder={setSelectedFolderId} width={leftWidth} />
+      {/* <FolderList onSelectFolder={setSelectedFolderId} width={leftWidth} /> */}
 
       {selectedFolderId === null ? (
         <div className="flex-1 flex flex-col justify-center items-center text-center p-8">
@@ -70,6 +68,7 @@ export default function Home() {
       ) : (
         <>
           <ResizablePanelGroup direction="horizontal">
+            
             <ResizablePanel>
               <div className="p-4">
                 <NoteList

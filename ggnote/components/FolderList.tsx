@@ -1,33 +1,30 @@
-'use client'
+"use client";
 
-import { useState, useEffect,  useRef } from "react";
-import FolderIcon from '@mui/icons-material/Folder';
+import { useState, useEffect, useRef } from "react";
+import useSWR from "swr";
+import FolderIcon from "@mui/icons-material/Folder";
 import { CreateNewFolderOutlined } from "@mui/icons-material";
 import { fetchFolders, createFolder, deleteFolder } from "@/lib/folderAPI";
 import { Folder } from "@/interface/folderInterface";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "./ui/sidebar";
+import { useFolder } from "@/context/FolderContext";
 
-interface FolderListProps {
-  onSelectFolder: (folderId: number | null) => void;
-  width: number;
-}
 
-export default function FolderList({ onSelectFolder, width }: FolderListProps) {
+
+export default function FolderList() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
   const [isCreateNewFolder, setIsCreateNewFolder] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const {setSelectedFolderId} = useFolder();
+  
+  // Fetch folders
+  const { data, error, mutate } = useSWR("/api/folders", fetchFolders, { refreshInterval: 5000 });
 
   useEffect(() => {
-    loadFolders();
-  }, []);
-
-  const loadFolders = async () => {
-    const data = await fetchFolders();
-    setFolders(data);
-
-    
-  };
+    if (data) setFolders(data);
+  }, [data]);
 
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) {
@@ -39,7 +36,7 @@ export default function FolderList({ onSelectFolder, width }: FolderListProps) {
     if (success) {
       setNewFolderName("");
       setIsCreateNewFolder(false);
-      loadFolders();
+      mutate(); // Re-fetch folders
     }
   };
 
@@ -48,9 +45,9 @@ export default function FolderList({ onSelectFolder, width }: FolderListProps) {
     if (success) {
       if (selectedFolder === id) {
         setSelectedFolder(null);
-        onSelectFolder(null);
+        setSelectedFolderId(null);
       }
-      loadFolders();
+      mutate(); // Re-fetch folders
     }
   };
 
@@ -77,66 +74,74 @@ export default function FolderList({ onSelectFolder, width }: FolderListProps) {
     }
   };
 
+  if (error) return <div>Failed to load folders</div>;
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <div style={{ width: `${width}px` }} className=" p-4 h-screen overflow-y-auto">
-        <h2 className="text-lg font-semibold mb-4">GG Note</h2>
+    <SidebarMenu>
+      {/* Create New Folder Button */}
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <div onClick={() => setIsCreateNewFolder((prev) => !prev)} className="flex items-center">
+            <CreateNewFolderOutlined fontSize="large" className="cursor-pointer mr-2" />
+            <span>Create Folder</span>
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
 
-        {/* Create New Folder Button */}
-        <div className="flex mb-4 justify-end">
-          <CreateNewFolderOutlined
-            fontSize="large"
-            className="cursor-pointer"
-            onClick={() => setIsCreateNewFolder((prev) => !prev)}
-          />
-        </div>
-
-        {/* Folder List */}
-        <ul className="space-y-2">
-          {folders.map((folder) => (
-            <li
-              key={folder.id}
-              className={`flex justify-between items-center cursor-pointer p-2 rounded ${
-                selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
-              }`}
-              onClick={() => {
-                setSelectedFolder(folder.id);
-                onSelectFolder(folder.id);
-              }}
-            >
-              <span>
-                <FolderIcon /> {folder.name}
-              </span>
-              <button
-                className="text-red-500 hover:text-red-700"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteFolder(folder.id);
+      {/* Loading State */}
+      {!folders ? (
+        Array.from({ length: 5 }).map((_, index) => (
+          <SidebarMenuItem key={index}>
+            <SidebarMenuSkeleton showIcon />
+          </SidebarMenuItem>
+        ))
+      ) : folders.length === 0 ? (
+        <div>No Folders Found</div>
+      ) : (
+        folders.map((folder) => (
+          <SidebarMenuItem key={folder.id}>
+              <div
+                className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
+                  selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
+                }`}
+                onClick={() => {
+                  setSelectedFolder(folder.id);
+                  setSelectedFolderId(folder.id);
                 }}
               >
-                ✖
-              </button>
-            </li>
-          ))}
-        </ul>
+                <span className="flex items-center">
+                  <FolderIcon className="mr-2" />
+                  {folder.name}
+                </span>
+                <button
+                  className="text-red-500 hover:text-red-700"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteFolder(folder.id);
+                  }}
+                >
+                  ✖
+                </button>
+              </div>
+          </SidebarMenuItem>
+        ))
+      )}
 
-        {/* Folder Name Input (Shows when creating a new folder) */}
-        {isCreateNewFolder && (
+      {/* Folder Name Input (Shows when creating a new folder) */}
+      {isCreateNewFolder && (
+        <SidebarMenuItem>
           <input
             ref={inputRef}
             type="text"
-            className="border p-2 flex-1 rounded mt-4 w-full"
+            className="border p-2 flex-1 rounded mt-2 w-full"
             placeholder="New Folder"
             value={newFolderName}
             onChange={(e) => setNewFolderName(e.target.value)}
             onKeyDown={handleKeyDown}
             autoFocus
           />
-        )}
-      </div>
-
-    </div>
+        </SidebarMenuItem>
+      )}
+    </SidebarMenu>
   );
 }
