@@ -69,7 +69,7 @@ export default function Home() {
         <>
           <ResizablePanelGroup direction="horizontal">
             
-            <ResizablePanel>
+            <ResizablePanel defaultSize={33}>
               <div className="p-4">
                 <NoteList
                   selectedFolder={selectedFolderId}

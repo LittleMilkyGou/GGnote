@@ -9,6 +9,8 @@ import {
   Redo,
   List,
   ListOrdered,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -35,11 +37,31 @@ export default function NoteCreator({
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [fontSize, setFontSize] = useState(3); // Default size (3 ~ 16px)
+  const [textColor, setTextColor] = useState("#000000"); 
+  const [textAlign, setTextAlign] = useState<"left" | "center">("left");
 
   // A helper to update text format states.
   const updateFormats = () => {
     updateActiveFormatsState(setActiveFormats, setCanUndo, setCanRedo);
   };
+
+   // Function to increase font size
+  const handleFontSizeChange = (change: number) => {
+    let newSize = Math.min(7, Math.max(1, fontSize + change)); // Ensure size stays within 1-7 (execCommand range)
+    setFontSize(newSize);
+    document.execCommand("fontSize", false, newSize.toString());
+  };
+  // Change text color
+const handleTextColorChange = (color: string) => {
+  setTextColor(color);
+  document.execCommand("foreColor", false, color);
+};
+const handleToggleAlignment = () => {
+  const newAlign = textAlign === "left" ? "center" : "left";
+  setTextAlign(newAlign);
+  document.execCommand(newAlign === "center" ? "justifyCenter" : "justifyLeft");
+};
 
   // Handle keydown for formatting shortcuts & undo/redo
   useEffect(() => {
@@ -176,6 +198,36 @@ export default function NoteCreator({
 
       {/* Formatting Toolbar */}
       <ToggleGroup type="multiple" value={activeFormats} onValueChange={setActiveFormats}>
+        {/* Increase Font Size */}
+        <ToggleGroupItem
+          value="increaseFontSize"
+          aria-label="Increase Font Size"
+          onClick={() => handleFontSizeChange(1)}
+        >
+          <span className="text-lg font-bold">A+</span>
+          
+        </ToggleGroupItem>
+
+        <ToggleGroupItem
+          value="decreaseFontSize"
+          aria-label="Decrease Font Size"
+          onClick={() => handleFontSizeChange(-1)}
+        >
+          <span className="text-lg font-bold">A-</span>
+        </ToggleGroupItem>
+
+        <ToggleGroupItem
+          value="textColor"
+          aria-label="Text Color"
+        >
+          <input
+            type="color"
+            value={textColor}
+            onChange={(e) => handleTextColorChange(e.target.value)}
+            className="w-8 h-8 cursor-pointer border rounded"
+          />
+        </ToggleGroupItem>
+
         <ToggleGroupItem
           value="bold"
           aria-label="Toggle bold"
@@ -197,6 +249,17 @@ export default function NoteCreator({
         >
           <Underline className={`h-4 w-4 ${activeFormats.includes("underline") ? "text-blue-500" : ""}`} />
         </ToggleGroupItem>
+        {/* Center Align Button */}
+        <ToggleGroupItem
+  value="alignToggle"
+  aria-label="Toggle Align"
+  onClick={handleToggleAlignment}
+>
+  <span className={`text-lg font-bold ${textAlign === "center" ? "text-blue-500" : ""}`}>
+    {textAlign === "center" ? "↔️" : "⬅️"} {/* Icons for visualization */}
+  </span>
+</ToggleGroupItem>
+
 
         {/* Ordered List Button */}
         <ToggleGroupItem

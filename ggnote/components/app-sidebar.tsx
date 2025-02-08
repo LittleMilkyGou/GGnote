@@ -22,7 +22,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            {/* <DropdownMenu>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
                   Select Workspace
@@ -35,7 +35,7 @@ export function AppSidebar() {
                 </DropdownMenuItem>
                 
               </DropdownMenuContent>
-            </DropdownMenu> */}
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
