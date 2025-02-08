@@ -56,7 +56,7 @@ export default function NoteViewer({ selectedNoteId, handleEditNote }: NoteViewe
             {note.title}
           </h2>
           <div
-            className="border-t pt-3 cursor-pointer text-gray-700 p-1 rounded"
+            className="border-t pt-3 cursor-pointer text-gray-700 p-1 rounded rich-text"
           >
             <div dangerouslySetInnerHTML={{ __html: note.content }} />
           </div>

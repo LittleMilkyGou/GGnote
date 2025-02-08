@@ -112,6 +112,8 @@ export function handleToggle(
   updateState();
 }
 
+
+
 /**
  * Executes an undo command if enabled, then updates the component state.
  */
@@ -137,3 +139,4 @@ export function handleRedo(
     updateState();
   }
 }
+

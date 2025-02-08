@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef, useState, useEffect } from "react";
+import ToolBar from "./ToolBar";
+import { updateActiveFormatsState } from "@/utils/EditorUtils";
 
 interface NoteEditorProps {
   selectedNote: { id: number; title: string; content: string };
@@ -8,17 +10,19 @@ interface NoteEditorProps {
 }
 
 export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorProps) {
-  // Use one ref for the container (for click outside detection)
   const containerRef = useRef<HTMLDivElement>(null);
-  // Use another ref for the contentEditable element
   const contentRef = useRef<HTMLDivElement>(null);
-
   const [title, setTitle] = useState<string>(selectedNote.title);
-  // We'll keep local state for content so we can save it,
-  // but we won't force re-render the contentEditable's inner HTML on every change.
   const [content, setContent] = useState<string>(selectedNote.content);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [activeFormats, setActiveFormats] = useState<string[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
 
+  const updateFormats = () => {
+    updateActiveFormatsState(setActiveFormats, setCanUndo, setCanRedo);
+  };
+  
   // Update state when a new note is selected.
   useEffect(() => {
     setTitle(selectedNote.title);
@@ -90,12 +94,22 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
         onChange={(e) => setTitle(e.target.value)}
       />
 
+      <ToolBar 
+        canRedo={canRedo}
+        canUndo={canUndo}
+        updateFormats={updateFormats}
+        activeFormats={activeFormats}
+        setActiveFormats={setActiveFormats}
+      />
+
       {/* Uncontrolled Content Editable */}
       <div
         contentEditable
         ref={contentRef}
-        // We update our local state on input but we don't re-render the innerHTML.
-        onInput={(e) => setContent(e.currentTarget.innerHTML)}
+        onInput={(e) => {
+          setContent(e.currentTarget.innerHTML);
+          updateFormats();
+        }}
         className="w-full mt-3 p-2 text-gray-700 min-h-[200px] outline-none focus:border-blue-500"
         style={{ whiteSpace: "pre-wrap" }}
         suppressContentEditableWarning

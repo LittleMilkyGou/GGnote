@@ -113,3 +113,31 @@ code, pre {
     @apply bg-background text-foreground;
   }
 }
+
+
+[contenteditable="true"] ul,
+[contenteditable="true"] ol {
+  list-style-type: disc; /* Bullet points for UL */
+  list-style-position: inside; /* Ensures bullets appear inside the div */
+  padding-left: 20px; /* Space for bullets */
+  margin-left: 0;
+}
+
+[contenteditable="true"] ol {
+  list-style-type: decimal; /* Numbers for OL */
+}
+
+
+@layer components {
+  .rich-text ul {
+    @apply list-disc list-inside pl-5;
+  }
+
+  .rich-text ol {
+    @apply list-decimal list-inside pl-5;
+  }
+
+  .rich-text li {
+    @apply my-1;
+  }
+}
