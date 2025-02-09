@@ -26,7 +26,7 @@ export default function ToolBar({canUndo,canRedo,activeFormats,setActiveFormats,
 
 
   const handleFontSizeChange = (change: number) => {
-    let newSize = Math.min(7, Math.max(1, fontSize + change)); // Ensure size stays within 1-7 (execCommand range)
+    const newSize = Math.min(7, Math.max(1, fontSize + change)); // Ensure size stays within 1-7 (execCommand range)
     setFontSize(newSize);
     document.execCommand("fontSize", false, newSize.toString());
   };

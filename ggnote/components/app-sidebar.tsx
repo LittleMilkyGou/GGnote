@@ -43,7 +43,6 @@ export function AppSidebar() {
       {/* Category List */}
       <SidebarContent>
         <SidebarGroup>
-            <SidebarGroupLabel>GG Note</SidebarGroupLabel>
             <SidebarGroupContent>
               <React.Suspense>
                 <FolderList />

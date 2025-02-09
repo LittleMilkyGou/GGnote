@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import FolderIcon from "@mui/icons-material/Folder";
-import { CreateNewFolderOutlined } from "@mui/icons-material";
 import { fetchFolders, createFolder, deleteFolder } from "@/lib/folderAPI";
 import { Folder } from "@/interface/folderInterface";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "./ui/sidebar";
 import { useFolder } from "@/context/FolderContext";
+import { FolderIcon, FolderPlus } from "lucide-react";
 
 
 
@@ -82,7 +81,7 @@ export default function FolderList() {
       <SidebarMenuItem>
         <SidebarMenuButton asChild>
           <div onClick={() => setIsCreateNewFolder((prev) => !prev)} className="flex items-center">
-            <CreateNewFolderOutlined fontSize="large" className="cursor-pointer mr-2" />
+            <FolderPlus fontSize="large" className="cursor-pointer mr-2" />
             <span>Create Folder</span>
           </div>
         </SidebarMenuButton>
@@ -110,7 +109,7 @@ export default function FolderList() {
                 }}
               >
                 <span className="flex items-center">
-                  <FolderIcon className="mr-2" />
+                  <FolderIcon className="mr-2 " />
                   {folder.name}
                 </span>
                 <button
