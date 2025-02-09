@@ -22,7 +22,11 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
   const updateFormats = () => {
     updateActiveFormatsState(setActiveFormats, setCanUndo, setCanRedo);
   };
-  
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.focus();
+    }
+  }, []);
   // Update state when a new note is selected.
   useEffect(() => {
     setTitle(selectedNote.title);
@@ -81,6 +85,8 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
       setIsSaving(false);
     }
   };
+
+  
 
   return (
     <div ref={containerRef} className="rounded h-full bg-white">

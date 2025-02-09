@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import BorderColorIcon from '@mui/icons-material/BorderColor';
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
+import { NotebookPen } from "lucide-react";
 
 
 interface Note {
@@ -88,7 +88,7 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote,onClo
           />
           {/* Add Note Button */}
           <button onClick={onAddNote} className="text-black p-2 rounded flex items-center">
-            <BorderColorIcon />
+            <NotebookPen />
           </button>
         </div>
       </div>

@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect,  useRef } from "react";
-import FolderIcon from '@mui/icons-material/Folder';
-import { CreateNewFolderOutlined } from "@mui/icons-material";
 import { fetchFolders, createFolder, deleteFolder } from "@/lib/folderAPI";
 import { Folder } from "@/interface/folderInterface";
+import { FolderIcon, FolderPlus } from "lucide-react";
 
 interface FolderListProps {
   onSelectFolder: (folderId: number | null) => void;
@@ -84,7 +83,7 @@ export default function FolderList({ onSelectFolder, width }: FolderListProps) {
 
         {/* Create New Folder Button */}
         <div className="flex mb-4 justify-end">
-          <CreateNewFolderOutlined
+          <FolderPlus
             fontSize="large"
             className="cursor-pointer"
             onClick={() => setIsCreateNewFolder((prev) => !prev)}
