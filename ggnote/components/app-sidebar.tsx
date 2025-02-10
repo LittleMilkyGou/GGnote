@@ -14,23 +14,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ChevronDown, ChevronUp, User2 } from "lucide-react"
 import React from "react"
 import FolderList from "./FolderList"
+import { ScrollArea } from "./ui/scroll-area"
 
 export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Workplace */}
-      <SidebarHeader>
+      <SidebarHeader className="bg-white">
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem> 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
+                <SidebarMenuButton >
                   Select Workspace
                   <ChevronDown className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
-                <DropdownMenuItem>
+                <DropdownMenuItem >
                   <span>Coming soon...</span>
                 </DropdownMenuItem>
                 
@@ -41,7 +42,9 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* Category List */}
-      <SidebarContent>
+      <ScrollArea className=" h-auto rounded-md">
+
+      <SidebarContent className="bg-white">
         <SidebarGroup>
             <SidebarGroupContent>
               <React.Suspense>
@@ -50,9 +53,9 @@ export function AppSidebar() {
             </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
+      </ScrollArea>
       {/* Settings */}
-      <SidebarFooter>
+      <SidebarFooter className="bg-white">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>

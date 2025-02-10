@@ -342,42 +342,42 @@ export default function NoteCreator({
   
 
   return (
-    <ScrollArea className="h-screen rounded-md">
+    <ScrollArea className="h-screen rounded-md pb-6">
 
-    <div ref={containerRef} className="rounded h-full bg-white p-4">
-      <h3 className="text-lg font-semibold mb-2">New Note</h3>
+      <div ref={containerRef} className="rounded h-full bg-white p-4">
+        <h3 className="text-lg font-semibold mb-2">New Note</h3>
 
-      {/* Title Input */}
-      <input
-        autoFocus
-        type="text"
-        placeholder="Enter note title..."
-        className="w-full border-b p-2 text-2xl font-bold outline-none focus:border-blue-500"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+        {/* Title Input */}
+        <input
+          autoFocus
+          type="text"
+          placeholder="Enter note title..."
+          className="w-full border-b p-2 text-2xl font-bold outline-none focus:border-blue-500"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-      {/* Formatting Toolbar */}
-      <ToolBar 
-        canRedo={canRedo}
-        canUndo={canUndo}
-        updateFormats={updateFormats}
-        activeFormats={activeFormats}
-        setActiveFormats={setActiveFormats}
-      />
+        {/* Formatting Toolbar */}
+        <ToolBar 
+          canRedo={canRedo}
+          canUndo={canUndo}
+          updateFormats={updateFormats}
+          activeFormats={activeFormats}
+          setActiveFormats={setActiveFormats}
+        />
 
-      {/* Content Editor */}
-      <div
-        contentEditable
-        ref={editorRef}
-        onInput={(e) => {
-          setContent(e.currentTarget.innerHTML);
-          updateFormats();
-        }}
-        className="w-full mt-3 p-2 text-gray-700 outline-none focus:border-blue-500"
-        style={{ whiteSpace: "pre-wrap",minHeight:"500px" }}
-      />
-    </div>
+        {/* Content Editor */}
+        <div
+          contentEditable
+          ref={editorRef}
+          onInput={(e) => {
+            setContent(e.currentTarget.innerHTML);
+            updateFormats();
+          }}
+          className="w-full mt-3 p-2 text-gray-700 outline-none focus:border-blue-500"
+          style={{ whiteSpace: "pre-wrap",minHeight:"500px" }}
+        />
+      </div>
     </ScrollArea>
   );
 }

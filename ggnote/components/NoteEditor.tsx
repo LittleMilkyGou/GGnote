@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import ToolBar from "./ToolBar";
 import { updateActiveFormatsState } from "@/utils/EditorUtils";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface NoteEditorProps {
   selectedNote: { id: number; title: string; content: string };
@@ -89,37 +90,40 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
   
 
   return (
-    <div ref={containerRef} className="rounded h-full bg-white">
-      <h3 className="text-sm text-gray-500 font-semibold mb-2">Edit Note</h3>
+    <ScrollArea className="h-screen rounded-md pb-6">
 
-      {/* Title Input */}
-      <input
-        type="text"
-        className="w-full border-b p-2 text-2xl font-bold outline-none focus:border-blue-500"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <div ref={containerRef} className="rounded h-full bg-white">
+        <h3 className="text-sm text-gray-500 font-semibold mb-2">Edit Note</h3>
 
-      <ToolBar 
-        canRedo={canRedo}
-        canUndo={canUndo}
-        updateFormats={updateFormats}
-        activeFormats={activeFormats}
-        setActiveFormats={setActiveFormats}
-      />
+        {/* Title Input */}
+        <input
+          type="text"
+          className="w-full border-b p-2 text-2xl font-bold outline-none focus:border-blue-500"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-      {/* Uncontrolled Content Editable */}
-      <div
-        contentEditable
-        ref={contentRef}
-        onInput={(e) => {
-          setContent(e.currentTarget.innerHTML);
-          updateFormats();
-        }}
-        className="w-full mt-3 p-2 text-gray-700 min-h-[200px] outline-none focus:border-blue-500"
-        style={{ whiteSpace: "pre-wrap" }}
-        suppressContentEditableWarning
-      />
-    </div>
+        <ToolBar 
+          canRedo={canRedo}
+          canUndo={canUndo}
+          updateFormats={updateFormats}
+          activeFormats={activeFormats}
+          setActiveFormats={setActiveFormats}
+        />
+
+        {/* Uncontrolled Content Editable */}
+        <div
+          contentEditable
+          ref={contentRef}
+          onInput={(e) => {
+            setContent(e.currentTarget.innerHTML);
+            updateFormats();
+          }}
+          className="w-full mt-3 p-2 text-gray-700 min-h-[200px] outline-none focus:border-blue-500"
+          style={{ whiteSpace: "pre-wrap" }}
+          suppressContentEditableWarning
+        />
+      </div>
+    </ScrollArea>
   );
 }

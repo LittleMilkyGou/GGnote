@@ -36,7 +36,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SidebarProvider>
             <AppSidebar />
             <main className="flex-1">
-              <SidebarTrigger />
               {children}
             </main>
           </SidebarProvider>

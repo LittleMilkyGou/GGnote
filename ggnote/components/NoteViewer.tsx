@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface Note {
   id: number;
@@ -43,27 +44,30 @@ export default function NoteViewer({ selectedNoteId, handleEditNote }: NoteViewe
   };
 
   return (
-    <div className="rounded h-full bg-white" >
-      {loading ? (
-        <p className="text-gray-500">Loading note...</p>
-      ) : note ? (
-        <div  className="h-full" onDoubleClick={() => handleEditNote(note)}>
-          <h3 className="text-sm text-gray-500 mt-2">Last updated: {new Date(note.updated_at).toLocaleString()}</h3>
+    <ScrollArea className="h-screen rounded-md pb-6">
 
-          <h2
-            className="text-2xl font-bold mb-2 cursor-pointer p-1 rounded"
-          >
-            {note.title}
-          </h2>
-          <div
-            className="border-t pt-3 cursor-pointer text-gray-700 p-1 rounded rich-text"
-          >
-            <div dangerouslySetInnerHTML={{ __html: note.content }} />
+      <div className="rounded h-full bg-white" >
+        {loading ? (
+          <p className="text-gray-500">Loading note...</p>
+        ) : note ? (
+          <div  className="h-full" onDoubleClick={() => handleEditNote(note)}>
+            <h3 className="text-sm text-gray-500 mt-2">Last updated: {new Date(note.updated_at).toLocaleString()}</h3>
+
+            <h2
+              className="text-2xl font-bold mb-2 cursor-pointer p-1 rounded"
+            >
+              {note.title}
+            </h2>
+            <div
+              className="border-t pt-3 cursor-pointer text-gray-700 p-1 rounded rich-text"
+            >
+              <div dangerouslySetInnerHTML={{ __html: note.content }} />
+            </div>
           </div>
-        </div>
-      ) : (
-        <p className="text-gray-500">Select a note to view its content.</p>
-      )}
-    </div>
+        ) : (
+          <p className="text-gray-500">Select a note to view its content.</p>
+        )}
+      </div>
+    </ScrollArea>
   );
 }

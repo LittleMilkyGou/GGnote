@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  wrapImageWithResizer,
   updateActiveFormatsState,
 } from "@/utils/EditorUtils"; 
 import ToolBar from "@/components/ToolBar";

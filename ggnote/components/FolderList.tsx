@@ -77,6 +77,7 @@ export default function FolderList() {
   if (error) return <div>Failed to load folders</div>;
 
   return (
+
     <SidebarMenu>
       {/* Create New Folder Button */}
       <SidebarMenuItem>
@@ -89,7 +90,6 @@ export default function FolderList() {
       </SidebarMenuItem>
 
       {/* Loading State */}
-      <ScrollArea className="h-auto rounded-md">
 
         {!folders ? (
           Array.from({ length: 5 }).map((_, index) => (
@@ -128,7 +128,6 @@ export default function FolderList() {
             </SidebarMenuItem>
           ))
         )}
-      </ScrollArea>
 
       {/* Folder Name Input (Shows when creating a new folder) */}
       {isCreateNewFolder && (
@@ -146,5 +145,6 @@ export default function FolderList() {
         </SidebarMenuItem>
       )}
     </SidebarMenu>
+
   );
 }

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/context-menu"
 import { NotebookPen } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
+import { SidebarTrigger } from "./ui/sidebar";
 
 
 interface Note {
@@ -76,9 +77,11 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote,onClo
   };
 
   return (
-    <div className="mt-4">
+    <div >
+      <SidebarTrigger className="mb-4"/>
       <div className=" flex flex-grow items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
+
           {/* Search Bar */}
           <input
             type="text"
