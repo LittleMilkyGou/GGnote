@@ -42,17 +42,17 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* Category List */}
-      <ScrollArea className=" h-auto rounded-md">
+      <ScrollArea className="bg-white h-screen rounded-md">
 
-      <SidebarContent className="bg-white">
-        <SidebarGroup>
-            <SidebarGroupContent>
-              <React.Suspense>
-                <FolderList />
-              </React.Suspense>
-            </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+        <SidebarContent className="bg-white">
+          <SidebarGroup>
+              <SidebarGroupContent>
+                <React.Suspense>
+                  <FolderList />
+                </React.Suspense>
+              </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
       </ScrollArea>
       {/* Settings */}
       <SidebarFooter className="bg-white">
