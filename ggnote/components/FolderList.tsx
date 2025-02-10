@@ -7,6 +7,7 @@ import { Folder } from "@/interface/folderInterface";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "./ui/sidebar";
 import { useFolder } from "@/context/FolderContext";
 import { FolderIcon, FolderPlus } from "lucide-react";
+import { ScrollArea } from "./ui/scroll-area";
 
 
 
@@ -88,43 +89,46 @@ export default function FolderList() {
       </SidebarMenuItem>
 
       {/* Loading State */}
-      {!folders ? (
-        Array.from({ length: 5 }).map((_, index) => (
-          <SidebarMenuItem key={index}>
-            <SidebarMenuSkeleton showIcon />
-          </SidebarMenuItem>
-        ))
-      ) : folders.length === 0 ? (
-        <div>No Folders Found</div>
-      ) : (
-        folders.map((folder) => (
-          <SidebarMenuItem key={folder.id}>
-              <div
-                className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
-                  selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
-                }`}
-                onClick={() => {
-                  setSelectedFolder(folder.id);
-                  setSelectedFolderId(folder.id);
-                }}
-              >
-                <span className="flex items-center">
-                  <FolderIcon className="mr-2 " />
-                  {folder.name}
-                </span>
-                <button
-                  className="text-red-500 hover:text-red-700"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteFolder(folder.id);
+      <ScrollArea className="h-auto rounded-md">
+
+        {!folders ? (
+          Array.from({ length: 5 }).map((_, index) => (
+            <SidebarMenuItem key={index}>
+              <SidebarMenuSkeleton showIcon />
+            </SidebarMenuItem>
+          ))
+        ) : folders.length === 0 ? (
+          <div>No Folders Found</div>
+        ) : (
+          folders.map((folder) => (
+            <SidebarMenuItem key={folder.id}>
+                <div
+                  className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
+                    selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
+                  }`}
+                  onClick={() => {
+                    setSelectedFolder(folder.id);
+                    setSelectedFolderId(folder.id);
                   }}
                 >
-                  ✖
-                </button>
-              </div>
-          </SidebarMenuItem>
-        ))
-      )}
+                  <span className="flex items-center">
+                    <FolderIcon className="mr-2 " />
+                    {folder.name}
+                  </span>
+                  <button
+                    className="text-red-500 hover:text-red-700"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteFolder(folder.id);
+                    }}
+                  >
+                    ✖
+                  </button>
+                </div>
+            </SidebarMenuItem>
+          ))
+        )}
+      </ScrollArea>
 
       {/* Folder Name Input (Shows when creating a new folder) */}
       {isCreateNewFolder && (

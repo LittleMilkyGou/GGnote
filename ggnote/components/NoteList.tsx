@@ -8,6 +8,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { NotebookPen } from "lucide-react";
+import { ScrollArea } from "./ui/scroll-area";
 
 
 interface Note {
@@ -96,33 +97,35 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote,onClo
       {filteredNotes.length === 0 ? (
         <p className="text-gray-500">No notes available.</p>
       ) : (
-        <ul className="space-y-2">
-          {filteredNotes.map((note) => (
-            <div key={note.id} >
-              <ContextMenu>
-                <ContextMenuTrigger>
-                <li 
-                  
-                  className={`p-3 rounded flex flex-col justify-center cursor-pointer ${
-                    selectedNoteId === note.id ? "bg-gray-300 " : "hover:bg-gray-200"
-                  }`}
-                  onClick={() => handleNoteClick(note.id)} // Select note on click
-                >
-                  <span className="font-semibold text-xl">{note.title}</span>
-                  <span className="text-gray-500 text-sm">{new Date(note.updated_at).toLocaleString()}</span>
-                </li>
+        <ScrollArea className="h-screen rounded-md pr-4">
+          <ul className="space-y-2">
+            {filteredNotes.map((note) => (
+              <div key={note.id} >
+                <ContextMenu>
+                  <ContextMenuTrigger>
+                  <li 
+                    
+                    className={`p-3 rounded flex flex-col justify-center cursor-pointer ${
+                      selectedNoteId === note.id ? "bg-gray-300 " : "hover:bg-gray-200"
+                    }`}
+                    onClick={() => handleNoteClick(note.id)} // Select note on click
+                  >
+                    <span className="font-semibold text-xl">{note.title}</span>
+                    <span className="text-gray-500 text-sm">{new Date(note.updated_at).toLocaleString()}</span>
+                  </li>
 
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem onClick={()=>deleteNote(note.id)}>Delete</ContextMenuItem>
-                  {/* <ContextMenuItem>Billing</ContextMenuItem>
-                  <ContextMenuItem>Team</ContextMenuItem>
-                  <ContextMenuItem>Subscription</ContextMenuItem>     */}
-                </ContextMenuContent>
-              </ContextMenu>
-            </div>
-          ))}
-        </ul>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem onClick={()=>deleteNote(note.id)}>Delete</ContextMenuItem>
+                    {/* <ContextMenuItem>Billing</ContextMenuItem>
+                    <ContextMenuItem>Team</ContextMenuItem>
+                    <ContextMenuItem>Subscription</ContextMenuItem>     */}
+                  </ContextMenuContent>
+                </ContextMenu>
+              </div>
+            ))}
+          </ul>
+        </ScrollArea>
       )}
     </div>
   );

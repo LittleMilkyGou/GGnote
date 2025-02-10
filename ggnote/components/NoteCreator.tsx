@@ -5,6 +5,7 @@ import {
   updateActiveFormatsState,
 } from "@/utils/EditorUtils"; 
 import ToolBar from "@/components/ToolBar";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface NoteCreatorProps {
   selectedFolder: number | null;
@@ -341,6 +342,8 @@ export default function NoteCreator({
   
 
   return (
+    <ScrollArea className="h-screen rounded-md">
+
     <div ref={containerRef} className="rounded h-full bg-white p-4">
       <h3 className="text-lg font-semibold mb-2">New Note</h3>
 
@@ -375,5 +378,6 @@ export default function NoteCreator({
         style={{ whiteSpace: "pre-wrap",minHeight:"500px" }}
       />
     </div>
+    </ScrollArea>
   );
 }
