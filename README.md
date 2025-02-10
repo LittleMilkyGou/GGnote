@@ -4,14 +4,15 @@
 3. Will utilize Tauri for building lightweight desktop application — less RAM usage 
 
 ## 💬Future Functionalites
-- [ ] Rich text editor
+- [x] Rich text editor
+- [ ] Drag to Reorder & Set Top Button
+- [ ] Select Workplace
 - [ ] Dark mode
 - [ ] Global searching
-- [ ] Drag to Reorder & Set Top Button
+- [ ] Tauri integration for installation of app (Final stage)
 - [ ] Deleted notes into trash bin (DB Backup)
 - [ ] Storage path setting
 - [ ] Diary Section (Different UI)
-- [ ] Tauri integration for installation of app (Final stage)
 - [ ] Background Images setting (Not important)
 
 ## ⭐ Demo ⭐
