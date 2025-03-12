@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -37,6 +40,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@tauri-apps/api": "^2.3.0",
+    "@tauri-apps/cli": "^2.3.1",
     "@types/better-sqlite3": "^7.6.12",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.17.16",

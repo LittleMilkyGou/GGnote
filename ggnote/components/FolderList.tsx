@@ -8,6 +8,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } 
 import { useFolder } from "@/context/FolderContext";
 import { FolderIcon, FolderPlus } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
+import { getFolders } from "@/lib/api";
 
 
 
@@ -22,9 +23,22 @@ export default function FolderList() {
   // Fetch folders
   const { data, error, mutate } = useSWR("/api/folders", fetchFolders, { refreshInterval: 5000 });
 
+  // useEffect(() => {
+  //   if (data) setFolders(data);
+  // }, [data]);
+
   useEffect(() => {
-    if (data) setFolders(data);
-  }, [data]);
+    loadFolders()
+  }, []);
+
+  async function loadFolders() {
+    try {
+      const data = await getFolders();
+      setFolders(data);
+    } catch (err) {
+      console.error(err);
+    } 
+  }
 
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) {
