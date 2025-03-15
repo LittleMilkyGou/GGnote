@@ -1,43 +1,34 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import useSWR from "swr";
-import { fetchFolders, createFolder, deleteFolder } from "@/lib/folderAPI";
 import { Folder } from "@/interface/folderInterface";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "./ui/sidebar";
 import { useFolder } from "@/context/FolderContext";
 import { FolderIcon, FolderPlus } from "lucide-react";
-import { ScrollArea } from "./ui/scroll-area";
-import { getFolders } from "@/lib/api";
-
-
+import { getFolders, createFolder, deleteFolder } from "@/lib/api";
 
 export default function FolderList() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
   const [isCreateNewFolder, setIsCreateNewFolder] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const {setSelectedFolderId} = useFolder();
-  
-  // Fetch folders
-  const { data, error, mutate } = useSWR("/api/folders", fetchFolders, { refreshInterval: 5000 });
-
-  // useEffect(() => {
-  //   if (data) setFolders(data);
-  // }, [data]);
+  const { setSelectedFolderId } = useFolder();
 
   useEffect(() => {
-    loadFolders()
+    loadFolders();
   }, []);
 
   async function loadFolders() {
     try {
-      const data = await getFolders();
-      setFolders(data);
+      const folders = await getFolders();
+      console.log(folders); // Array of Folder objects
+      setFolders(folders);
     } catch (err) {
-      console.error(err);
-    } 
+      console.error("Error loading folders:", err);
+    }
   }
 
   const handleCreateFolder = async () => {
@@ -46,22 +37,30 @@ export default function FolderList() {
       return;
     }
 
-    const success = await createFolder(newFolderName);
-    if (success) {
+    try {
+      await createFolder(newFolderName);
       setNewFolderName("");
       setIsCreateNewFolder(false);
-      mutate(); // Re-fetch folders
+      // Refresh the folders list
+      await loadFolders();
+    } catch (err) {
+      console.error("Error creating folder:", err);
+      setError("Failed to create folder");
     }
   };
 
   const handleDeleteFolder = async (id: number) => {
-    const success = await deleteFolder(id);
-    if (success) {
+    try {
+      await deleteFolder(id);
       if (selectedFolder === id) {
         setSelectedFolder(null);
         setSelectedFolderId(null);
       }
-      mutate(); // Re-fetch folders
+      // Refresh the folders list
+      await loadFolders();
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+      setError("Failed to delete folder");
     }
   };
 
@@ -88,10 +87,7 @@ export default function FolderList() {
     }
   };
 
-  if (error) return <div>Failed to load folders</div>;
-
   return (
-
     <SidebarMenu>
       {/* Create New Folder Button */}
       <SidebarMenuItem>
@@ -103,45 +99,78 @@ export default function FolderList() {
         </SidebarMenuButton>
       </SidebarMenuItem>
 
+      {/* Error Message */}
+      {error && (
+        <SidebarMenuItem>
+          <div className="text-red-500 p-2">{error}</div>
+        </SidebarMenuItem>
+      )}
+{folders.map((folder) => (
+          <SidebarMenuItem key={folder.id}>
+            <div
+              className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
+                selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
+              }`}
+              onClick={() => {
+                setSelectedFolder(folder.id);
+                setSelectedFolderId(folder.id);
+              }}
+            >
+              <span className="flex items-center">
+                <FolderIcon className="mr-2" />
+                {folder.name}
+              </span>
+              <button
+                className="text-red-500 hover:text-red-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteFolder(folder.id);
+                }}
+              >
+                ✖
+              </button>
+            </div>
+            {isLoading.toString()}
+          </SidebarMenuItem>
+        ))}
       {/* Loading State */}
-
-        {!folders ? (
-          Array.from({ length: 5 }).map((_, index) => (
-            <SidebarMenuItem key={index}>
-              <SidebarMenuSkeleton showIcon />
-            </SidebarMenuItem>
-          ))
-        ) : folders.length === 0 ? (
-          <div>No Folders Found</div>
-        ) : (
-          folders.map((folder) => (
-            <SidebarMenuItem key={folder.id}>
-                <div
-                  className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
-                    selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
-                  }`}
-                  onClick={() => {
-                    setSelectedFolder(folder.id);
-                    setSelectedFolderId(folder.id);
-                  }}
-                >
-                  <span className="flex items-center">
-                    <FolderIcon className="mr-2 " />
-                    {folder.name}
-                  </span>
-                  <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteFolder(folder.id);
-                    }}
-                  >
-                    ✖
-                  </button>
-                </div>
-            </SidebarMenuItem>
-          ))
-        )}
+      {isLoading ? (
+        Array.from({ length: 5 }).map((_, index) => (
+          <SidebarMenuItem key={index}>
+            <SidebarMenuSkeleton showIcon />
+          </SidebarMenuItem>
+        ))
+      ) : folders.length === 0 ? (
+        <div className="p-2">No Folders Found</div>
+      ) : (
+        folders.map((folder) => (
+          <SidebarMenuItem key={folder.id}>
+            <div
+              className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
+                selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
+              }`}
+              onClick={() => {
+                setSelectedFolder(folder.id);
+                setSelectedFolderId(folder.id);
+              }}
+            >
+              <span className="flex items-center">
+                <FolderIcon className="mr-2" />
+                {folder.name}
+              </span>
+              <button
+                className="text-red-500 hover:text-red-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteFolder(folder.id);
+                }}
+              >
+                ✖
+              </button>
+            </div>
+          </SidebarMenuItem>
+        ))
+      )}
 
       {/* Folder Name Input (Shows when creating a new folder) */}
       {isCreateNewFolder && (
@@ -159,6 +188,5 @@ export default function FolderList() {
         </SidebarMenuItem>
       )}
     </SidebarMenu>
-
   );
 }
