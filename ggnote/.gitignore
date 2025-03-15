@@ -43,3 +43,6 @@ next-env.d.ts
 
 #database
 ggnote.db
+
+package-lock.json
+dist/
