@@ -24,18 +24,15 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
     updateActiveFormatsState(setActiveFormats, setCanUndo, setCanRedo);
   };
 
-  // Set focus when component mounts
   useEffect(() => {
     if (contentRef.current) {
       contentRef.current.focus();
     }
   }, []);
 
-  // Update state when a new note is selected
   useEffect(() => {
     setTitle(selectedNote.title);
     setContent(selectedNote.content);
-    // Also update the contentEditable's inner HTML directly
     if (contentRef.current) {
       contentRef.current.innerHTML = selectedNote.content;
     }
@@ -56,11 +53,9 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [title, content]);
 
-  // Save function using Electron IPC
   const handleSave = async () => {
     if (isSaving) return;
   
-    // If both fields are empty, simply close the editor
     if (!title.trim() && !content.trim()) {
       onCloseEditor();
       return;
@@ -69,12 +64,11 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
     setIsSaving(true);
   
     try {
-      // Use Electron IPC with a single object parameter
       const result = await window.api.updateNote({
         id: selectedNote.id,
         title: title.trim(),
         content: content.trim(),
-        folder_id: selectedNote.folder_id // Preserve the folder_id
+        folder_id: selectedNote.folder_id 
       });
   
       if (result.error) {
@@ -109,7 +103,6 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
           </button>
         </div>
 
-        {/* Title Input */}
         <input
           type="text"
           className="w-full border-b p-2 text-2xl font-bold outline-none focus:border-blue-500"

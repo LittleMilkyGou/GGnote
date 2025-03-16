@@ -13,13 +13,13 @@ interface ToolBarProps {
   canUndo: boolean;
   canRedo: boolean;
   activeFormats: string[];
-  setActiveFormats: (formats: string[]) => void; // Fix type
-  updateFormats: () => void; // Fix type
+  setActiveFormats: (formats: string[]) => void; 
+  updateFormats: () => void;
 }
 
 
 export default function ToolBar({canUndo,canRedo,activeFormats,setActiveFormats,updateFormats}:ToolBarProps){
-  const [fontSize, setFontSize] = useState(3); // Default size (3 ~ 16px)
+  const [fontSize, setFontSize] = useState(3); 
   const [textColor, setTextColor] = useState("#000000"); 
   const [textAlign, setTextAlign] = useState<"left" | "center">("left");
 

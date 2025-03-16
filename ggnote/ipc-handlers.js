@@ -3,11 +3,9 @@ const path = require('path');
 const fs = require('fs').promises;
 const { db } = require('./db');
 
-// Set up IPC handlers for all operations
 function setupIpcHandlers(mainWindow) {
-  // --------- FOLDER OPERATIONS ---------
-  
-  // Create a new folder
+
+  // Folder table
   ipcMain.handle('create-folder', async (event, { name }) => {
     try {
       if (!name || typeof name !== 'string') {
@@ -17,7 +15,6 @@ function setupIpcHandlers(mainWindow) {
       const statement = db.prepare('INSERT INTO folders (name) VALUES (?)');
       const result = statement.run(name);
 
-      // Notify renderer about the update
       mainWindow.webContents.send('folders-updated');
       
       return { message: 'Folder created', folderId: result.lastInsertRowid };
@@ -27,7 +24,7 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // Get all folders
+
   ipcMain.handle('get-folders', async () => {
     try {
       const statement = db.prepare('SELECT * FROM folders ORDER BY id DESC');
@@ -40,7 +37,7 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // Delete a folder
+
   ipcMain.handle('delete-folder', async (event, { id }) => {
     try {
       if (!id || typeof id !== 'number') {
@@ -50,11 +47,9 @@ function setupIpcHandlers(mainWindow) {
       const statement = db.prepare('DELETE FROM folders WHERE id = ?');
       statement.run(id);
 
-      // Also update any notes that had this folder
       const updateNotes = db.prepare('UPDATE notes SET folder_id = NULL WHERE folder_id = ?');
       updateNotes.run(id);
 
-      // Notify renderer about the update
       mainWindow.webContents.send('folders-updated');
       mainWindow.webContents.send('notes-updated');
       
@@ -65,12 +60,10 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // --------- NOTE OPERATIONS ---------
-  
-  // Create a new note
+
+  //Note table
   ipcMain.handle('create-note', async (event, { title, content, folder_id }) => {
     try {
-      // Ensure folder_id is provided since it's required in your schema
       if (!folder_id) {
         return { error: 'Folder ID is required', status: 400 };
       }
@@ -86,7 +79,6 @@ function setupIpcHandlers(mainWindow) {
         folder_id
       );
 
-      // Notify renderer about the update
       mainWindow.webContents.send('notes-updated');
       
       return { message: 'Note saved', noteId: result.lastInsertRowid };
@@ -96,7 +88,6 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // Get all notes
   ipcMain.handle('get-notes', async (event, { folderId }) => {
     try {
       let statement;
@@ -117,7 +108,6 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // Get a single note by ID
   ipcMain.handle('get-note', async (event, id) => {
     try {
       if (isNaN(id)) {
@@ -138,7 +128,6 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // Update a note
   ipcMain.handle('update-note', async (event, { id, title, content }) => {
     try {
       if (isNaN(id)) {
@@ -149,7 +138,6 @@ function setupIpcHandlers(mainWindow) {
         return { error: 'Title or content must be provided', status: 400 };
       }
 
-      // First get existing note
       const getNote = db.prepare('SELECT title, content FROM notes WHERE id = ?');
       const existingNote = getNote.get(id);
       
@@ -157,7 +145,6 @@ function setupIpcHandlers(mainWindow) {
         return { error: 'Note not found', status: 404 };
       }
 
-      // Update with new values or keep existing ones
       const statement = db.prepare(`
         UPDATE notes 
         SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP
@@ -170,7 +157,6 @@ function setupIpcHandlers(mainWindow) {
         id
       );
 
-      // Notify renderer about the update
       mainWindow.webContents.send('notes-updated');
       
       return { message: 'Note updated successfully' };
@@ -180,7 +166,6 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // Delete a note
   ipcMain.handle('delete-note', async (event, id) => {
     try {
       if (isNaN(id)) {
@@ -190,7 +175,6 @@ function setupIpcHandlers(mainWindow) {
       const statement = db.prepare('DELETE FROM notes WHERE id = ?');
       statement.run(id);
 
-      // Notify renderer about the update
       mainWindow.webContents.send('notes-updated');
       
       return { message: 'Note deleted successfully' };
@@ -200,12 +184,10 @@ function setupIpcHandlers(mainWindow) {
     }
   });
 
-  // --------- FILE UPLOAD OPERATIONS ---------
   
   // Upload an image
   ipcMain.handle('upload-image', async (event, formData) => {
     try {
-      // In Electron, we'll receive the file buffer directly
       if (!formData || !formData.buffer) {
         return { error: 'No file uploaded', status: 400 };
       }
@@ -215,10 +197,8 @@ function setupIpcHandlers(mainWindow) {
       const uploadsDir = path.join(app.getPath('userData'), 'uploads');
       const filePath = path.join(uploadsDir, fileName);
 
-      // Save the file
       await fs.writeFile(filePath, buffer);
 
-      // Return a path that can be used in the app
       return { filePath: `file://${filePath}` };
     } catch (error) {
       console.error('Error uploading file:', error);

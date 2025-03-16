@@ -31,14 +31,11 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote, onCl
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Set up listener for note updates
   useEffect(() => {
-    // Listen for note updates from the main process
     const unsubscribe = window.api.onNotesUpdated(() => {
       fetchNotes();
     });
     
-    // Cleanup listener on unmount
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
@@ -46,24 +43,19 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote, onCl
     };
   }, []);
 
-  // Fetch notes when selected folder changes
   useEffect(() => {
     fetchNotes();
   }, [selectedFolder]);
 
-  // Fetch notes based on the selected folder
-  // Updated fetchNotes function
 const fetchNotes = async () => {
   setIsLoading(true);
   setError(null);
   
   try {
-    // Use Electron IPC instead of fetch - convert null to undefined
     const data = await window.api.getNotes(selectedFolder ?? undefined);
     
-    // Check if data is an array
     if (!Array.isArray(data)) {
-      // Handle case where data is an error object instead of an array
+
       if (data && typeof data === 'object' && 'error' in data) {
         throw new Error("Error get notes");
       }
@@ -83,14 +75,12 @@ const fetchNotes = async () => {
     if (!confirm("Are you sure you want to delete this note?")) return;
 
     try {
-      // Use Electron IPC instead of fetch
       const result = await window.api.deleteNote(id);
       
       if (result.error) {
         throw new Error(result.error);
       }
       
-      // Update local state to remove the deleted note
       setNotes((prevNotes) => prevNotes.filter(note => note.id !== id));
       
       if (selectedNoteId === id) {
@@ -104,12 +94,10 @@ const fetchNotes = async () => {
     }
   }
 
-  // Filter notes based on search query
   const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle note selection and update state
   const handleNoteClick = (noteId: number) => {
     setSelectedNoteId(noteId);
     onSelectNote(noteId);

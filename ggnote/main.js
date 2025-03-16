@@ -5,7 +5,7 @@ const url = require('url');
 const { db, initDatabase } = require('./db');
 const { setupIpcHandlers } = require('./ipc-handlers');
 
-// Setup logging to a file for debugging packaged app
+// Setup logging for debugging 
 const logPath = path.join(app.getPath('userData'), 'app.log');
 console.log(`Logging to: ${logPath}`);
 
@@ -18,7 +18,6 @@ console.log = function() {
   try {
     fs.appendFileSync(logPath, `[LOG] ${args.join(' ')}\n`);
   } catch (err) {
-    // If we can't write to the log file, just continue with normal console.log
   }
   originalConsoleLog.apply(console, args);
 };
@@ -28,12 +27,10 @@ console.error = function() {
   try {
     fs.appendFileSync(logPath, `[ERROR] ${args.join(' ')}\n`);
   } catch (err) {
-    // If we can't write to the log file, just continue with normal console.error
   }
   originalConsoleError.apply(console, args);
 };
 
-// Log startup information
 console.log(`App starting at ${new Date().toISOString()}`);
 console.log(`App path: ${app.getAppPath()}`);
 console.log(`__dirname: ${__dirname}`);
@@ -45,13 +42,11 @@ let mainWindow;
 // Handle Next.js static files with a custom protocol
 function registerNextStaticProtocol() {
   protocol.registerBufferProtocol('static', (request, callback) => {
-    // Get the requested path and remove the protocol prefix
+    
     let filePath = request.url.replace('static://', '');
     
-    // Remove any leading slash
     filePath = filePath.replace(/^\/+/, '');
     
-    // Ensure we don't have duplicate _next path segments
     if (filePath.startsWith('_next/_next/')) {
       filePath = filePath.replace('_next/_next/', '_next/');
     }
@@ -59,16 +54,14 @@ function registerNextStaticProtocol() {
     // In production builds, resources are in the resources/app.asar (or resources/app) directory
     let basePath = __dirname;
     if (app.isPackaged) {
-      // Check if we're in an asar archive
+
       if (__dirname.includes('app.asar')) {
-        // For packaged apps, the relative paths might be different
         basePath = path.join(process.resourcesPath, 'app.asar');
       } else {
         basePath = path.join(process.resourcesPath, 'app');
       }
     }
     
-    // The correct path to the static files within the out directory
     const absolutePath = path.join(basePath, 'out', filePath);
     
     console.log(`Loading static resource: ${filePath}`);
@@ -77,7 +70,7 @@ function registerNextStaticProtocol() {
     try {
       if (!fs.existsSync(absolutePath)) {
         console.error(`File not found: ${absolutePath}`);
-        // Try alternative paths
+
         const altPath = path.join(process.resourcesPath, 'app', 'out', filePath);
         console.log(`Trying alternative path: ${altPath}`);
         
@@ -99,7 +92,6 @@ function registerNextStaticProtocol() {
       callback({ mimeType, data });
     } catch (error) {
       console.error(`Failed to load file: ${absolutePath}`, error);
-      // Return null to indicate error
       callback(null);
     }
   });
@@ -232,16 +224,12 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  // Initialize database
   initDatabase();
   
-  // Register our custom protocol
   registerNextStaticProtocol();
   
-  // Create the main window
   createWindow();
   
-  // Create error.html for fallback
   const errorHtmlPath = path.join(app.getPath('userData'), 'error.html');
   fs.writeFileSync(errorHtmlPath, `
   <!DOCTYPE html>
@@ -273,7 +261,6 @@ app.on('activate', () => {
 
 // Handle shutdown
 app.on('before-quit', () => {
-  // Close database connection
   if (db) {
     db.close();
   }

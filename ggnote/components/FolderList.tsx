@@ -7,8 +7,6 @@ import { useFolder } from "@/context/FolderContext";
 import { FolderIcon, FolderPlus } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 
-// No need to redeclare global Window interface here
-// It's already defined in folderInterface.ts
 
 export default function FolderList() {
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -20,7 +18,6 @@ export default function FolderList() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { setSelectedFolderId } = useFolder();
   
-  // Fetch folders using Electron IPC
   const fetchFolders = async () => {
     setIsLoading(true);
     try {
@@ -35,17 +32,14 @@ export default function FolderList() {
     }
   };
 
-  // Initial fetch and set up listener for folder updates
   useEffect(() => {
     fetchFolders();
     console.log("yes")
-    // Set up listener for folder updates from main process
     const unsubscribe = window.api.onFoldersUpdated(() => {
       fetchFolders();
     });
     
     return () => {
-      // Clean up listener when component unmounts
       if (typeof unsubscribe === 'function') {
         unsubscribe();
       }
@@ -65,7 +59,7 @@ export default function FolderList() {
       } else {
         setNewFolderName("");
         setIsCreateNewFolder(false);
-        fetchFolders(); // Re-fetch folders
+        fetchFolders(); 
       }
     } catch (err) {
       console.error('Failed to create folder:', err);
@@ -77,7 +71,6 @@ export default function FolderList() {
       const result = await window.api.deleteFolder({id:id});
       if (result.error) {
         console.error('Error deleting folder:', result.error);
-        // If we can't delete the last folder, show an alert
         if (result.status === 400) {
           alert(result.error);
         }
@@ -86,7 +79,7 @@ export default function FolderList() {
           setSelectedFolder(null);
           setSelectedFolderId(null);
         }
-        fetchFolders(); // Re-fetch folders
+        fetchFolders(); 
       }
     } catch (err) {
       console.error('Failed to delete folder:', err);
@@ -120,7 +113,6 @@ export default function FolderList() {
 
   return (
     <SidebarMenu>
-      {/* Create New Folder Button */}
       <SidebarMenuItem>
         <SidebarMenuButton asChild>
           <div onClick={() => setIsCreateNewFolder((prev) => !prev)} className="flex items-center">
@@ -130,7 +122,6 @@ export default function FolderList() {
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      {/* Loading State */}
       {isLoading ? (
         Array.from({ length: 5 }).map((_, index) => (
           <SidebarMenuItem key={index}>
@@ -169,7 +160,6 @@ export default function FolderList() {
         ))
       )}
 
-      {/* Folder Name Input (Shows when creating a new folder) */}
       {isCreateNewFolder && (
         <SidebarMenuItem>
           <input

@@ -46,7 +46,6 @@ export default function NoteCreator({
     };
   }, [title, content]);
 
-  // Save function
   const handleSave = async () => {
     if (isSaving) return;
     if (!title.trim() && !content.trim()) {
@@ -54,7 +53,6 @@ export default function NoteCreator({
       return;
     }
 
-    // Check if a folder is selected - required in our database
     if (!selectedFolder) {
       alert("Please select a folder first");
       return;
@@ -63,7 +61,6 @@ export default function NoteCreator({
     setIsSaving(true);
 
     try {
-      // Use the Electron IPC API instead of fetch
       const result = await window.api.createNote({
         title: title.trim(),
         content: content.trim(),
@@ -86,7 +83,6 @@ export default function NoteCreator({
 
   // Set up the image resizing logic on the contentEditable area
   useEffect(() => {
-    // Only proceed if using Chrome.
     if (!(/chrome/i.test(navigator.userAgent) && /google/i.test(navigator.vendor))) {
       return;
     }
@@ -94,7 +90,6 @@ export default function NoteCreator({
     const editor = editorRef.current;
     if (!editor) return;
   
-    // Helper to create DOM elements with inline styles.
     const createDOM = (
       elementType: string,
       className: string,

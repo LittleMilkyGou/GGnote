@@ -12,7 +12,7 @@ interface Note {
 
 interface NoteViewerProps {
   selectedNoteId: number | null;
-  handleEditNote: (note: Note) => void; // Passes the note to edit mode
+  handleEditNote: (note: Note) => void; 
 }
 
 export default function NoteViewer({ selectedNoteId, handleEditNote }: NoteViewerProps) {
@@ -34,14 +34,10 @@ export default function NoteViewer({ selectedNoteId, handleEditNote }: NoteViewe
     setError(null);
     
     try {
-      // Use Electron IPC instead of fetch
       const data = await window.api.getNote(noteId);
       
-      // Explicitly type the result to resolve the issue
       setNote(data as React.SetStateAction<Note | null>);
-  
     } catch (error) {
-      // Add error handling here
       setError("Failed to fetch note details");
     } finally {
       setLoading(false);
