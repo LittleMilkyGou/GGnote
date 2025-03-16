@@ -4,16 +4,31 @@
 3. Will utilize Tauri for building lightweight desktop application — less RAM usage 
 
 ## 💬Future Functionalites
+- [x] Electron integration for packaging app
 - [x] Rich text editor
 - [ ] Drag to Reorder & Set Top Button
-- [ ] Select Workplace
-- [ ] Dark mode
+- [ ] Switch Workplace
 - [ ] Global searching
-- [ ] Tauri integration for installation of app (Final stage)
-- [ ] Deleted notes into trash bin (DB Backup)
+- [ ] Dark mode
+- [ ] Deleted notes into trash bin
 - [ ] Storage path setting
 - [ ] Diary Section (Different UI)
 - [ ] Background Images setting (Not important)
+
+## 🚀Prerequisites
+Ensure you have the following installed on your system:
+
+- [Node.js](https://nodejs.org/) (v15.x or later recommended)
+- [npm](https://www.npmjs.com/) (v6.x or later) 
+
+Additionally, for building and packaging the application, you will need:
+- Windows: Visual Studio Build Tools
+
+1. `npm install`
+2. `npm run build`
+3. `npm run start`
+
+If success, you will see a popup window
 
 ## ⭐ Demo ⭐
 ![App Demo](ggnote/public/image.png)
