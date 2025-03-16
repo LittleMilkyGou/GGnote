@@ -1,18 +1,49 @@
 {
   "name": "ggnote",
   "version": "0.1.0",
+  "description": "A note-taking application built with Electron and Next.js",
+  "author": {
+    "name": "Gary Gao",
+    "email": "gary_gaoyx@outlook.com"
+  },
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --turbopack\" \"npm run electron:dev\"",
-    "electron:dev": "wait-on http://localhost:3000 && electron .",
-    "build": "next build && next export",
-    "build:electron": "tsc -p tsconfig-electron.json",
-    "start": "electron .",
-    "lint": "next lint",
-    "package": "npm run build && electron-builder build --win",
-    "rebuild": "electron-rebuild -f -w better-sqlite3"
+    "dev": "next dev",
+    "next:dev": "next dev",
+    "electron:dev": "cross-env NODE_ENV=development electron .",
+    "build": "next build",
+    "start": "cross-env NODE_ENV=production electron .",
+    "package": "rimraf dist && npm run build && electron-builder",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "postinstall": "electron-builder install-app-deps"
   },
   "main": "main.js",
+  "build": {
+    "appId": "com.garygao.ggnote",
+    "productName": "GGNote",
+    "files": [
+      "out/**/*",
+      "*.js",
+      "db.js",
+      "ipc-handlers.js",
+      "preload.js",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "extraResources": [
+      {
+        "from": "out",
+        "to": "app/out",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -48,11 +79,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
     "electron": "^35.0.1",
     "electron-builder": "^25.1.8",
+    "electron-rebuild": "^3.2.9",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.7.3",
     "wait-on": "^8.0.3"

@@ -6,7 +6,7 @@ import { updateActiveFormatsState } from "@/utils/EditorUtils";
 import { ScrollArea } from "./ui/scroll-area";
 
 interface NoteEditorProps {
-  selectedNote: { id: number; title: string; content: string };
+  selectedNote: { id: number; title: string; content: string; folder_id?: number };
   onCloseEditor: () => void;
 }
 
@@ -23,22 +23,25 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
   const updateFormats = () => {
     updateActiveFormatsState(setActiveFormats, setCanUndo, setCanRedo);
   };
+
+  // Set focus when component mounts
   useEffect(() => {
     if (contentRef.current) {
       contentRef.current.focus();
     }
   }, []);
-  // Update state when a new note is selected.
+
+  // Update state when a new note is selected
   useEffect(() => {
     setTitle(selectedNote.title);
     setContent(selectedNote.content);
-    // Also update the contentEditable's inner HTML directly.
+    // Also update the contentEditable's inner HTML directly
     if (contentRef.current) {
       contentRef.current.innerHTML = selectedNote.content;
     }
   }, [selectedNote]);
 
-  // Click outside detection using the container ref.
+  // Click outside detection using the container ref
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -53,47 +56,58 @@ export default function NoteEditor({ selectedNote, onCloseEditor }: NoteEditorPr
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [title, content]);
 
-  // Save function.
+  // Save function using Electron IPC
   const handleSave = async () => {
     if (isSaving) return;
-
-    // If both fields are empty, simply close the editor.
+  
+    // If both fields are empty, simply close the editor
     if (!title.trim() && !content.trim()) {
       onCloseEditor();
       return;
     }
-
+  
     setIsSaving(true);
-
+  
     try {
-      const response = await fetch(`/api/notes/${selectedNote.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          content: content.trim(),
-        }),
+      // Use Electron IPC with a single object parameter
+      const result = await window.api.updateNote({
+        id: selectedNote.id,
+        title: title.trim(),
+        content: content.trim(),
+        folder_id: selectedNote.folder_id // Preserve the folder_id
       });
-
-      if (!response.ok) throw new Error("Failed to update note");
-
+  
+      if (result.error) {
+        throw new Error(result.error);
+      }
+  
       console.log("Note updated successfully");
       onCloseEditor();
     } catch (error) {
       console.error("Error updating note:", error);
-      alert("Failed to update note");
+      alert(`Failed to update note: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
   };
 
-  
-
   return (
     <ScrollArea className="h-screen rounded-md pb-6">
-
-      <div ref={containerRef} className="rounded h-full bg-white">
-        <h3 className="text-sm text-gray-500 font-semibold mb-2">Edit Note</h3>
+      <div ref={containerRef} className="rounded h-full bg-white p-4">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm text-gray-500 font-semibold">Edit Note</h3>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className={`px-3 py-1 rounded text-sm ${
+              isSaving 
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+        </div>
 
         {/* Title Input */}
         <input

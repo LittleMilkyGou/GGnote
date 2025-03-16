@@ -54,26 +54,31 @@ export default function NoteCreator({
       return;
     }
 
+    // Check if a folder is selected - required in our database
+    if (!selectedFolder) {
+      alert("Please select a folder first");
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      const response = await fetch(`/api/notes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          content: content.trim(), // This now contains only the content editor HTML
-          folder_id: selectedFolder,
-        }),
+      // Use the Electron IPC API instead of fetch
+      const result = await window.api.createNote({
+        title: title.trim(),
+        content: content.trim(),
+        folder_id: selectedFolder
       });
 
-      if (!response.ok) throw new Error("Failed to save note");
+      if (result.error) {
+        throw new Error(result.error);
+      }
 
       console.log("Note saved successfully");
       onCloseCreator();
     } catch (error) {
       console.error("Error saving note:", error);
-      alert("Failed to save note");
+      alert(`Failed to save note: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
@@ -375,8 +380,23 @@ export default function NoteCreator({
             updateFormats();
           }}
           className="w-full mt-3 p-2 text-gray-700 outline-none focus:border-blue-500"
-          style={{ whiteSpace: "pre-wrap",minHeight:"500px" }}
+          style={{ whiteSpace: "pre-wrap", minHeight: "500px" }}
         />
+
+        {/* Save Button */}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={handleSave}
+            disabled={isSaving || (!title.trim() && !content.trim())}
+            className={`px-4 py-2 rounded ${
+              isSaving || (!title.trim() && !content.trim())
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
+          >
+            {isSaving ? "Saving..." : "Save Note"}
+          </button>
+        </div>
       </div>
     </ScrollArea>
   );

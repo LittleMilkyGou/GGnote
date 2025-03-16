@@ -1,30 +1,56 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import useSWR from "swr";
-import { fetchFolders, createFolder, deleteFolder } from "@/lib/folderAPI";
 import { Folder } from "@/interface/folderInterface";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "./ui/sidebar";
 import { useFolder } from "@/context/FolderContext";
 import { FolderIcon, FolderPlus } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 
-
+// No need to redeclare global Window interface here
+// It's already defined in folderInterface.ts
 
 export default function FolderList() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
   const [isCreateNewFolder, setIsCreateNewFolder] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const {setSelectedFolderId} = useFolder();
+  const { setSelectedFolderId } = useFolder();
   
-  // Fetch folders
-  const { data, error, mutate } = useSWR("/api/folders", fetchFolders, { refreshInterval: 5000 });
+  // Fetch folders using Electron IPC
+  const fetchFolders = async () => {
+    setIsLoading(true);
+    try {
+      const data = await window.api.getFolders();
+      setFolders(data);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch folders:', err);
+      setError('Failed to load folders');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Initial fetch and set up listener for folder updates
   useEffect(() => {
-    if (data) setFolders(data);
-  }, [data]);
+    fetchFolders();
+    console.log("yes")
+    // Set up listener for folder updates from main process
+    const unsubscribe = window.api.onFoldersUpdated(() => {
+      fetchFolders();
+    });
+    
+    return () => {
+      // Clean up listener when component unmounts
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) {
@@ -32,22 +58,38 @@ export default function FolderList() {
       return;
     }
 
-    const success = await createFolder(newFolderName);
-    if (success) {
-      setNewFolderName("");
-      setIsCreateNewFolder(false);
-      mutate(); // Re-fetch folders
+    try {
+      const result = await window.api.createFolder({name:newFolderName});
+      if (result.error) {
+        console.error('Error creating folder:', result.error);
+      } else {
+        setNewFolderName("");
+        setIsCreateNewFolder(false);
+        fetchFolders(); // Re-fetch folders
+      }
+    } catch (err) {
+      console.error('Failed to create folder:', err);
     }
   };
 
   const handleDeleteFolder = async (id: number) => {
-    const success = await deleteFolder(id);
-    if (success) {
-      if (selectedFolder === id) {
-        setSelectedFolder(null);
-        setSelectedFolderId(null);
+    try {
+      const result = await window.api.deleteFolder({id:id});
+      if (result.error) {
+        console.error('Error deleting folder:', result.error);
+        // If we can't delete the last folder, show an alert
+        if (result.status === 400) {
+          alert(result.error);
+        }
+      } else {
+        if (selectedFolder === id) {
+          setSelectedFolder(null);
+          setSelectedFolderId(null);
+        }
+        fetchFolders(); // Re-fetch folders
       }
-      mutate(); // Re-fetch folders
+    } catch (err) {
+      console.error('Failed to delete folder:', err);
     }
   };
 
@@ -77,7 +119,6 @@ export default function FolderList() {
   if (error) return <div>Failed to load folders</div>;
 
   return (
-
     <SidebarMenu>
       {/* Create New Folder Button */}
       <SidebarMenuItem>
@@ -90,44 +131,43 @@ export default function FolderList() {
       </SidebarMenuItem>
 
       {/* Loading State */}
-
-        {!folders ? (
-          Array.from({ length: 5 }).map((_, index) => (
-            <SidebarMenuItem key={index}>
-              <SidebarMenuSkeleton showIcon />
-            </SidebarMenuItem>
-          ))
-        ) : folders.length === 0 ? (
-          <div>No Folders Found</div>
-        ) : (
-          folders.map((folder) => (
-            <SidebarMenuItem key={folder.id}>
-                <div
-                  className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
-                    selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
-                  }`}
-                  onClick={() => {
-                    setSelectedFolder(folder.id);
-                    setSelectedFolderId(folder.id);
-                  }}
-                >
-                  <span className="flex items-center">
-                    <FolderIcon className="mr-2 " />
-                    {folder.name}
-                  </span>
-                  <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteFolder(folder.id);
-                    }}
-                  >
-                    ✖
-                  </button>
-                </div>
-            </SidebarMenuItem>
-          ))
-        )}
+      {isLoading ? (
+        Array.from({ length: 5 }).map((_, index) => (
+          <SidebarMenuItem key={index}>
+            <SidebarMenuSkeleton showIcon />
+          </SidebarMenuItem>
+        ))
+      ) : folders.length === 0 ? (
+        <div>No Folders Found</div>
+      ) : (
+        folders.map((folder) => (
+          <SidebarMenuItem key={folder.id}>
+            <div
+              className={`flex justify-between w-full items-center cursor-pointer p-2 rounded ${
+                selectedFolder === folder.id ? "bg-blue-200" : "hover:bg-gray-200"
+              }`}
+              onClick={() => {
+                setSelectedFolder(folder.id);
+                setSelectedFolderId(folder.id);
+              }}
+            >
+              <span className="flex items-center">
+                <FolderIcon className="mr-2" />
+                {folder.name}
+              </span>
+              <button
+                className="text-red-500 hover:text-red-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteFolder(folder.id);
+                }}
+              >
+                ✖
+              </button>
+            </div>
+          </SidebarMenuItem>
+        ))
+      )}
 
       {/* Folder Name Input (Shows when creating a new folder) */}
       {isCreateNewFolder && (
@@ -145,6 +185,5 @@ export default function FolderList() {
         </SidebarMenuItem>
       )}
     </SidebarMenu>
-
   );
 }
