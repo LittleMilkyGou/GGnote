@@ -260,7 +260,7 @@ app.whenReady().then(() => {
     <h1>Build Error</h1>
     <p>Could not find Next.js build output.</p>
     <p>Please run "npm run build" before starting the application.</p>
-    <p>Check the log file at: ${logPath}</p>
+    <p>Check the log file at: ${logPath}</p> 
   </body>
   </html>
   `);
