@@ -6,7 +6,7 @@ const fs = require('fs');
 // Ensure the data directory exists
 const userDataPath = app.getPath('userData');
 const dbDir = path.join(userDataPath, 'database');
-
+console.log(`Database Path: ${dbDir}`);
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }

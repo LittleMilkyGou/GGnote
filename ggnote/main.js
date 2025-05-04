@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol } = require('electron');
+const { app, BrowserWindow, protocol,globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const url = require('url');
@@ -64,8 +64,6 @@ function registerNextStaticProtocol() {
     
     const absolutePath = path.join(basePath, 'out', filePath);
     
-    console.log(`Loading static resource: ${filePath}`);
-    console.log(`Absolute path: ${absolutePath}`);
     
     try {
       if (!fs.existsSync(absolutePath)) {
@@ -154,7 +152,6 @@ function createWindow() {
       
       // Read the index.html content
       const indexPath = path.join(outDir, 'index.html');
-      console.log(`Index path: ${indexPath}`);
       
       if (!fs.existsSync(indexPath)) {
         console.error(`ERROR: index.html not found at ${indexPath}`);
@@ -229,7 +226,25 @@ app.whenReady().then(() => {
   registerNextStaticProtocol();
   
   createWindow();
-  
+
+  const ret = globalShortcut.register('Alt+CommandOrControl+S', () => {
+    // Check if window exists
+    if (mainWindow) {
+      // If window is minimized, restore it
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      // Show and focus the window
+      mainWindow.show()
+      mainWindow.focus()
+    } else {
+      // If window was closed, create a new one
+      createWindow()
+    }
+  })
+
+  if (!ret) {
+    console.log('Registration failed - shortcut may be in use by another application')
+  }
+
   const errorHtmlPath = path.join(app.getPath('userData'), 'error.html');
   fs.writeFileSync(errorHtmlPath, `
   <!DOCTYPE html>
@@ -264,6 +279,7 @@ app.on('before-quit', () => {
   if (db) {
     db.close();
   }
-  
+  globalShortcut.unregister('Alt+CommandOrControl+S')
+
   console.log('Application shutting down');
 });

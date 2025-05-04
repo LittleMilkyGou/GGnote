@@ -26,14 +26,12 @@ export default function Home() {
   const handleCloseEditor = () => {
     setIsEditorOpen(false);
     setEditingNote(null);
-    setSelectedNoteId(null);
     setIsCreatorOpen(false);
   };
 
   const handleOpenCreator = () => {
     setEditingNote(null);
     setIsEditorOpen(false);
-    setSelectedNoteId(null);
     setIsCreatorOpen(true);
   };
 
@@ -41,7 +39,6 @@ export default function Home() {
     setIsEditorOpen(false);
     setEditingNote(null);
     setIsCreatorOpen(false);
-    setSelectedNoteId(null);
   };
 
   const handleSelectNote = (noteId: number | null) => {
@@ -90,7 +87,7 @@ export default function Home() {
                     onCloseEditor={handleCloseEditor}
                   />
                 ) : isCreatorOpen ? (
-                  <NoteCreator selectedFolder={selectedFolderId} onCloseCreator={handleCloseCreator}/>
+                  <NoteCreator selectedFolder={selectedFolderId} setSelectedNoteId={setSelectedNoteId} onCloseCreator={handleCloseCreator}/>
                 ) : (
                   <NoteViewer selectedNoteId={selectedNoteId} handleEditNote={handleEditNote} />
                 )}

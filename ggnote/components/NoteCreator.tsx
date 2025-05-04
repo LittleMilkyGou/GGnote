@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import {
   updateActiveFormatsState,
 } from "@/utils/EditorUtils"; 
@@ -10,11 +10,13 @@ import { ScrollArea } from "./ui/scroll-area";
 interface NoteCreatorProps {
   selectedFolder: number | null;
   onCloseCreator: () => void;
+  setSelectedNoteId: Dispatch<SetStateAction<number | null>>;
 }
 
 export default function NoteCreator({
   selectedFolder,
   onCloseCreator,
+  setSelectedNoteId
 }: NoteCreatorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -66,12 +68,13 @@ export default function NoteCreator({
         content: content.trim(),
         folder_id: selectedFolder
       });
+      console.log(result.key)
+      console.log(result.message)
 
       if (result.error) {
         throw new Error(result.error);
       }
 
-      console.log("Note saved successfully");
       onCloseCreator();
     } catch (error) {
       console.error("Error saving note:", error);

@@ -31,6 +31,8 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote, onCl
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+
+
   useEffect(() => {
     const unsubscribe = window.api.onNotesUpdated(() => {
       fetchNotes();
@@ -47,29 +49,29 @@ export default function NoteList({ selectedFolder, onAddNote, onSelectNote, onCl
     fetchNotes();
   }, [selectedFolder]);
 
-const fetchNotes = async () => {
-  setIsLoading(true);
-  setError(null);
-  
-  try {
-    const data = await window.api.getNotes(selectedFolder ?? undefined);
+  const fetchNotes = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    if (!Array.isArray(data)) {
+    try {
+      const data = await window.api.getNotes(selectedFolder ?? undefined);
+      
+      if (!Array.isArray(data)) {
 
-      if (data && typeof data === 'object' && 'error' in data) {
-        throw new Error("Error get notes");
+        if (data && typeof data === 'object' && 'error' in data) {
+          throw new Error("Error get notes");
+        }
+        throw new Error('Invalid response format');
       }
-      throw new Error('Invalid response format');
+      
+      setNotes(data);
+    } catch (error) {
+      console.error("Failed to fetch notes:", error);
+      setError("Failed to load notes. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    
-    setNotes(data);
-  } catch (error) {
-    console.error("Failed to fetch notes:", error);
-    setError("Failed to load notes. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const deleteNote = async (id: number) => {
     if (!confirm("Are you sure you want to delete this note?")) return;
